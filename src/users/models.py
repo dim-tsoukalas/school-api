@@ -32,7 +32,10 @@ class EmailUserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    email = models.EmailField(_("email_address"), max_length=255, unique=True)
+    EMAIL_LENGTH = 254
+
+    email = models.EmailField(
+        _("email_address"), max_length=EMAIL_LENGTH, unique=True)
 
     USERNAME_FIELD = "email"
     EMAIL_FIELD = "email"
