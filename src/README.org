@@ -1,0 +1,18 @@
+* Class Manager
+
+Project for the Webdev class. The project involves creating a web application to
+manage university classes and grades.
+
+** Django apps
+
+*** mainpage
+
+This is the base app. It serves the homepage, a listing of all the available
+departments and links for accessing every other feature of the web application.
+It provides database models for the university departments.
+
+*** users
+**depends: mainpage**
+
+User authentication and authorization. There are four user types supported: superuser,
+deptadmin, teacher, student.
