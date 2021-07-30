@@ -1,7 +1,7 @@
 from django.contrib.auth import login, authenticate, logout
 from django.shortcuts import render, redirect
 
-from .forms import StudentSignupForm, TeacherSignupForm, LoginForm
+from .forms import StudentSignupForm, TeacherSignupForm, SigninForm
 
 
 def signup_student(request):
@@ -40,14 +40,14 @@ def signup_teacher(request):
 
 def signin(request):
     if request.method == "POST":
-        form = LoginForm(request.POST)
+        form = SigninForm(request.POST)
         if form.is_valid():
             login(request, form.get_user())
             return redirect("home")
     else:
-        form = LoginForm()
+        form = SigninForm()
 
-    return render(request, "signup.html", {"form": form})
+    return render(request, "mainpage.html", {"signin_form": form})
 
 
 def signout(request):
