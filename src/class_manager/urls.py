@@ -16,10 +16,12 @@ Including another URLconf
 from django.urls import path
 
 import users.views
+import mainpage.views
 
 urlpatterns = [
-    path("", users.views.signup_student, name="home"),
-    path("login", users.views.user_login, name="login"),
+    path("", mainpage.views.home, name="home"),
+    path("signin", users.views.signin, name="signin"),
+    path("signout", users.views.signout, name="signout"),
     path("signup/student", users.views.signup_student, name="signup_student"),
     path("signup/teacher", users.views.signup_teacher, name="signup_teacher")
 ]
