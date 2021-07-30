@@ -1,9 +1,32 @@
 {% extends "base.html" %}
 
 {% block main_menu_content %}
+
 {% if not user.is_authenticated %}
-<a href="/signin">Sign in</a>
-<a href="/signup">Sign up</a>
+<div class="signinbar">
+  <form method="post" action="/signin">
+    {% csrf_token %}
+
+    {% if signin_form.non_field_errors %}
+      {% for error in signin_form.non_field_errors %}
+        <label>{{ error }}</label>
+      {% endfor %}
+    {% else %}
+      {% for field in signin_form %}
+        {% for error in field.errors %}
+        <label style="color: red">{{ error }}</label>
+        {% endfor %}
+      {% endfor %}
+    {% endif %}
+
+    {% for field in signin_form %}
+      {{ field }}
+    {% endfor %}
+    <input type="submit" value="Sign in">
+  </form>
+</div>
+<a class="signup-btn" href="/signup">Sign up</a>
+
 {% elif user.is_superuser %}
 <a href="/signout">Sign out</a>
 {% endif %}
