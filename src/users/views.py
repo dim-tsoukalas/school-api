@@ -1,4 +1,4 @@
-from django.contrib.auth import login, authenticate
+from django.contrib.auth import login, authenticate, logout
 from django.shortcuts import render, redirect
 
 from .forms import StudentSignupForm, TeacherSignupForm, LoginForm
@@ -38,7 +38,7 @@ def signup_teacher(request):
     return render(request, "signup.html", {"form": form})
 
 
-def user_login(request):
+def signin(request):
     if request.method == "POST":
         form = LoginForm(request.POST)
         if form.is_valid():
@@ -48,3 +48,8 @@ def user_login(request):
         form = LoginForm()
 
     return render(request, "signup.html", {"form": form})
+
+
+def signout(request):
+    logout(request)
+    return redirect("home")
