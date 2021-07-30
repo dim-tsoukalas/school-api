@@ -63,23 +63,26 @@ class TeacherSignupForm(UserCreationForm):
         return user
 
 
-class LoginForm(forms.Form):
+class SigninForm(forms.Form):
     email = forms.EmailField(
         label=_("Email"),
         max_length=User.EMAIL_LENGTH,
-        widget=forms.EmailInput(attrs={'autofocus': True})
+        widget=forms.EmailInput(attrs={
+            'autofocus': False,
+            "placeholder": "Email"
+        })
     )
     password = forms.CharField(
         label=_("Password"),
         strip=False,
-        widget=forms.PasswordInput(attrs={'autocomplete': 'current-password'}),
+        widget=forms.PasswordInput(attrs={
+            'autocomplete': 'current-password',
+            "placeholder": "Password"
+        })
     )
 
     error_messages = {
-        'invalid_login': _(
-            "Please enter a correct %(email)s and password. Note that both "
-            "fields may be case-sensitive."
-        ),
+        'invalid_login': _("Incorrect email or password."),
         'inactive': _("This account is inactive."),
     }
 
@@ -92,8 +95,7 @@ class LoginForm(forms.Form):
             if self.user_cache is None:
                 raise ValidationError(
                     self.error_messages['invalid_login'],
-                    code='invalid_login',
-                    params={'email': "Email"},
+                    code='invalid_login'
                 )
             else:
                 self.confirm_login_allowed(self.user_cache)
