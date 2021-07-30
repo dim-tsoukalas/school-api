@@ -1,0 +1,30 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>{% block title %}University{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'base.css' %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  </head>
+  <body>
+    <header>
+      <nav class="logo-menu">
+        <a class="logo" href=""></a>
+        {% block dept %}{% endblock %}
+        <div class="searchbar">
+          <form action="/search">
+            <input type="text" placeholder="Search..." name="search">
+            <input type="submit" value="&#x279C;">
+          </form>
+        </div>
+      </nav>
+      <nav class="main-menu">
+        {% block main_menu_content %}{% endblock %}
+      </nav>
+    </header>
+
+    <div class="content">
+      {% block content %}{% endblock %}
+    </div>
+  </body>
+</html>

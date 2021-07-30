@@ -1,0 +1,97 @@
+html, body {
+    padding: 0;
+    margin: 0;
+}
+
+html {
+    background: ;
+}
+
+header {
+    padding: 0;
+    margin: 0;
+    background-color: #020202;
+    color: #fff;
+}
+
+
+/*
+ * Logo menu
+ */
+
+.logo-menu {
+    display: flex;
+    align-items: center;
+    background-color: #ffaaaa;
+}
+
+.logo {
+    background: url(https://via.placeholder.com/100x100/ffaaaa/000000?text=LOGO) center;
+    width: 100px;
+    height: 40px;
+}
+
+.searchbar {
+    margin: 0 10px 0 0;
+    margin-left: auto;
+}
+
+.searchbar input {
+    border: none;
+    margin: 0;
+    padding: 0;
+}
+
+.searchbar input[type=text] {
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
+    font-size: 1.1em;
+    width: 15ch;
+    padding: 3px;
+}
+
+.searchbar input[type=text]:hover {
+    border-left: 3px solid #000;
+}
+
+.searchbar input[type=text]:focus {
+    border-left: 3px solid #000;
+}
+
+.searchbar input[type=submit] {
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+    font-size: 1.1em;
+    background-color: #3e9b15;
+    color: #fff;
+    padding: 3px 7px;
+    margin-left: -5px;
+    cursor: pointer;
+}
+
+.searchbar input[type=submit]:hover {
+    background-color: #000;
+}
+
+
+/*
+ * Main menu
+ */
+
+.main-menu {
+    display: flex;
+    justify-content: right;
+    background-color: #222333;
+    padding: 0 10px;
+}
+
+.main-menu a {
+    padding: 5px 8px;
+    font-size: 0.9em;
+    color: #eee;
+    text-decoration: none;
+}
+
+.main-menu a:hover {
+    color: #ffaaaa;
+}
