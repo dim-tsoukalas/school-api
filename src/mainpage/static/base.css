@@ -173,7 +173,7 @@ header {
  */
 
 .content {
-    background-color: 
+    background-color: ;
 }
 
 
@@ -181,29 +181,64 @@ header {
  * Sign up
  */
 
-.signup {
+.signup-container {
     display: flex;
     justify-content: center;
 }
 
-.base_form {
+
+/*
+ * Inputs and Forms: form_container
+ */
+
+.form_container {
     box-sizing: border-box;
     border: 1px solid #fff;
     border-radius: 10px;
     background-color: #eee;
-    padding: 10px;
+    padding: 15px;
     margin: 10px;
 }
 
-.base_form form {
-    padding: 0;
-    margin: 0;
+.form_container p {
+    text-align: center;
 }
 
-.base_form input {
-    padding: 3px;
-    margin: 0 0 10px 0;
-    border: 1px solid #000;
+
+.form_container label {
+    padding: 0 0 3px 0;
+    display: inline-block;
+}
+
+.base_field {
+    padding-bottom: 8px;
+}
+
+.form_container input, select {
+    width: 100%;
+    padding: 5px;
+    border: 1px solid #bbb;
     border-radius: 3px;
-
 }
+
+.form_container input:hover,
+.form_container input:focus {
+    border-left: 3px solid var(--form-submit-bg-c);
+    margin-left: -2px;
+}
+
+.form_container input[type=submit] {
+    border: 2px solid var(--form-submit-bg-c);
+    border-radius: 3px;
+    background-color: var(--form-submit-bg-c);
+    color: #fff;
+    width: 100px;
+    float: right;
+    padding: 7px 10px;
+}
+
+.form_container input[type=submit]:hover {
+    background-color: #000;
+}
+
+
