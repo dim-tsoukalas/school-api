@@ -14,11 +14,13 @@ def signup_student(request):
             password = form.cleaned_data.get('password1')
             user = authenticate(username=user.email, password=password)
             login(request, user)
-            return redirect("admin")
+            return redirect("")
     else:
         return redirect("signup")
 
-    return render(request, "signup.html", {"form": form})
+    t_dict = {"teacher_form": TeacherSignupForm(),
+              "student_form": form}
+    return render(request, "signup.html", t_dict)
 
 
 def signup_teacher(request):
@@ -31,11 +33,13 @@ def signup_teacher(request):
             password = form.cleaned_data.get('password1')
             user = authenticate(username=user.email, password=password)
             login(request, user)
-            return redirect("admin")
+            return redirect("")
     else:
         return redirect("signup")
 
-    return render(request, "signup.html", {"form": form})
+    t_dict = {"teacher_form": form,
+              "student_form": StudentSignupForm()}
+    return render(request, "signup.html", t_dict)
 
 
 def signup(request):
