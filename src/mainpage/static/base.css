@@ -9,6 +9,7 @@ html, body {
 
 html {
     background: ;
+    font-family: sans-serif;
 }
 
 header {
@@ -149,19 +150,60 @@ header {
 }
 
 .signinbar input[type=submit]:hover {
-    background-color: #222;
+    background-color: #000;
 }
 
 .signup-btn {
     font-size: 0.8em !important;
     color: #fff;
-    background-color: #004fff;
+    border: 1px solid #fff;
     margin-left: 3px;
     padding: 3px 7px !important;
     border-radius: 3px;
 }
 
 .signup-btn:hover {
-    background-color: #222;
+    background-color: #000;
     color: #fff !important;
+}
+
+
+/*
+ * Content
+ */
+
+.content {
+    background-color: 
+}
+
+
+/*
+ * Sign up
+ */
+
+.signup {
+    display: flex;
+    justify-content: center;
+}
+
+.base_form {
+    box-sizing: border-box;
+    border: 1px solid #fff;
+    border-radius: 10px;
+    background-color: #eee;
+    padding: 10px;
+    margin: 10px;
+}
+
+.base_form form {
+    padding: 0;
+    margin: 0;
+}
+
+.base_form input {
+    padding: 3px;
+    margin: 0 0 10px 0;
+    border: 1px solid #000;
+    border-radius: 3px;
+
 }
