@@ -16,7 +16,7 @@ def signup_student(request):
             login(request, user)
             return redirect("admin")
     else:
-        form = StudentSignupForm()
+        return redirect("signup")
 
     return render(request, "signup.html", {"form": form})
 
@@ -33,9 +33,17 @@ def signup_teacher(request):
             login(request, user)
             return redirect("admin")
     else:
-        form = TeacherSignupForm()
+        return redirect("signup")
 
     return render(request, "signup.html", {"form": form})
+
+
+def signup(request):
+    t_dict = {
+        "teacher_form": TeacherSignupForm(),
+        "student_form": StudentSignupForm()
+    }
+    return render(request, "signup.html", t_dict)
 
 
 def signin(request):

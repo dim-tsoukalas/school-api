@@ -22,6 +22,7 @@ urlpatterns = [
     path("", mainpage.views.home, name="home"),
     path("signin", users.views.signin, name="signin"),
     path("signout", users.views.signout, name="signout"),
+    path("signup", users.views.signup, name="signup"),
     path("signup/student", users.views.signup_student, name="signup_student"),
     path("signup/teacher", users.views.signup_teacher, name="signup_teacher")
 ]
