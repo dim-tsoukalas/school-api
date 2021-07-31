@@ -9,7 +9,7 @@
   <body>
     <header>
       <nav class="logo-menu">
-        <a class="logo" href=""></a>
+        <a class="logo" href="/"></a>
         {% block dept %}{% endblock %}
         <div class="searchbar">
           <form action="/search">
@@ -19,6 +19,16 @@
         </div>
       </nav>
       <nav class="main-menu">
+        {% if not user.is_authenticated %}
+
+            {% comment %} Requires: signin_form {% endcomment %}
+            {% include "guest_menu.html" %}
+
+        {% elif user.is_superuser %}
+
+             {% include "superuser_menu.html" %}
+
+        {% endif %}
         {% block main_menu_content %}{% endblock %}
       </nav>
     </header>
