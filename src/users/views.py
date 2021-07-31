@@ -20,6 +20,10 @@ def signup_student(request):
 
     t_dict = {"teacher_form": TeacherSignupForm(),
               "student_form": form}
+
+    if not request.user.is_authenticated:
+        t_dict["signin_form"] = SigninForm()
+
     return render(request, "signup.html", t_dict)
 
 
@@ -39,6 +43,10 @@ def signup_teacher(request):
 
     t_dict = {"teacher_form": form,
               "student_form": StudentSignupForm()}
+
+    if not request.user.is_authenticated:
+        t_dict["signin_form"] = SigninForm()
+
     return render(request, "signup.html", t_dict)
 
 
@@ -47,6 +55,9 @@ def signup(request):
         "teacher_form": TeacherSignupForm(),
         "student_form": StudentSignupForm()
     }
+    if not request.user.is_authenticated:
+        t_dict["signin_form"] = SigninForm()
+
     return render(request, "signup.html", t_dict)
 
 
