@@ -239,6 +239,7 @@ header {
 
 .form_container input[type=submit]:hover {
     background-color: #000;
+    border-color: #000;
 }
 
 
