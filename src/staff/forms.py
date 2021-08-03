@@ -23,9 +23,7 @@ class DepartmentAddForm(forms.ModelForm):
         model = Department
         fields = ["name"]
 
-    @transaction.atomic
-    def add(self):
-        dep = super().add(commit=False)
-        dep.name = self.cleaned_data.get("name")
-        dep.add()
-        return dep
+    def save(self):
+        dept = super().save(commit=False)
+        dept.save()
+        return dept
