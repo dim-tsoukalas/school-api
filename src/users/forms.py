@@ -6,31 +6,58 @@ from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 
 from .models import User, Student, Teacher
+from mainpage.models import Department, DepartmentStudents, DepartmentTeachers
+
+import datetime
 
 
-# TODO: add department selection
+# ====================================================================
+# Helpers
+# ====================================================================
 
+class DepartmentChoiceField(forms.ModelChoiceField):
+    def label_from_instance(self, obj):
+        return obj.name
+
+
+# ====================================================================
+# Forms
+# ====================================================================
 
 class StudentSignupForm(UserCreationForm):
+    department = DepartmentChoiceField(
+        queryset=Department.objects.all(),
+        required=True
+    )
     email = forms.EmailField(
         max_length=255, help_text="Required. Enter a valid email address."
     )
     first_name = forms.CharField(max_length=200, required=True)
     last_name = forms.CharField(max_length=200, required=True)
     registry_id = forms.CharField(max_length=100, required=True)
-    admission_year = forms.CharField(max_length=4, required=True)
+    admission_year = forms.IntegerField(
+        min_value=2000, max_value=datetime.datetime.now().year, required=True
+    )
+
+    error_messages = {
+        "registry_id_exists": _("A student with this registry id already"
+                                " exists."),
+    }
 
     class Meta(UserCreationForm.Meta):
         model = User
-        fields = [
-            "first_name",
-            "last_name",
-            "registry_id",
-            "admission_year",
-            "email",
-            "password1",
-            "password2",
-        ]
+        fields = ["department", "first_name", "last_name", "registry_id",
+                  "admission_year", "email", "password1", "password2"]
+
+    def clean(self):
+        cleaned_data = super().clean()
+        reg_id = cleaned_data.get("registry_id")
+        if Student.objects.filter(registry_id=reg_id):
+            raise ValidationError(
+                self.error_messages["registry_id_exists"],
+                code="registry_id_exists"
+            )
+        return cleaned_data
 
     @transaction.atomic
     def save(self):
@@ -43,20 +70,31 @@ class StudentSignupForm(UserCreationForm):
         student.last_name = self.cleaned_data.get("last_name")
         student.admission_year = self.cleaned_data.get("admission_year")
         student.save()
+        DepartmentStudents.objects.create(
+            dept_id=self.cleaned_data.get("department"),
+            student_id=user
+        )
         return user
 
 
 class TeacherSignupForm(UserCreationForm):
+    department = DepartmentChoiceField(
+        queryset=Department.objects.all(),
+        required=True
+    )
     email = forms.EmailField(
         max_length=255, help_text="Required. Enter a valid email address."
     )
     first_name = forms.CharField(max_length=200, required=True)
     last_name = forms.CharField(max_length=200, required=True)
-    rank = forms.ChoiceField(choices=Teacher.TeacherRanks.choices)
+    rank = forms.ChoiceField(
+        choices=Teacher.TeacherRanks.choices, required=True
+    )
 
     class Meta(UserCreationForm.Meta):
         model = User
-        fields = ["first_name", "last_name", "rank", "email", "password1", "password2"]
+        fields = ["department", "first_name", "last_name", "rank", "email",
+                  "password1", "password2"]
 
     @transaction.atomic
     def save(self):
@@ -68,6 +106,10 @@ class TeacherSignupForm(UserCreationForm):
         teacher.last_name = self.cleaned_data.get("last_name")
         teacher.rank = self.cleaned_data.get("rank")
         teacher.save()
+        DepartmentTeachers.objects.create(
+            dept_id=self.cleaned_data.get("department"),
+            teacher_id=user
+        )
         return user
 
 
@@ -75,19 +117,21 @@ class SigninForm(forms.Form):
     email = forms.EmailField(
         label=_("Email"),
         max_length=User.EMAIL_LENGTH,
-        widget=forms.EmailInput(attrs={"autofocus": False, "placeholder": "Email"}),
+        widget=forms.EmailInput(attrs={
+            "autofocus": False, "placeholder": "Email"
+        }),
     )
     password = forms.CharField(
         label=_("Password"),
         strip=False,
-        widget=forms.PasswordInput(
-            attrs={"autocomplete": "current-password", "placeholder": "Password"}
-        ),
+        widget=forms.PasswordInput(attrs={
+            "autocomplete": "current-password", "placeholder": "Password"
+        }),
     )
 
     error_messages = {
         "invalid_login": _("Incorrect email or password."),
-        "inactive": _("This account is inactive."),
+        "disabled": _("Please wait for your account to be enabled."),
     }
 
     def clean(self):
@@ -109,8 +153,8 @@ class SigninForm(forms.Form):
         return self.user_cache
 
     def confirm_login_allowed(self, user):
-        if not user.is_active:
+        if not user.is_enabled:
             raise ValidationError(
-                self.error_messages["inactive"],
-                code="inactive",
+                self.error_messages["disabled"],
+                code="disabled",
             )
