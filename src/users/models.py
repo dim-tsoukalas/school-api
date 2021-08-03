@@ -41,10 +41,14 @@ class User(AbstractBaseUser, PermissionsMixin):
     EMAIL_FIELD = "email"
     REQUIRED_FIELDS = []
 
-    is_staff = models.BooleanField(_('active'), default=False)
+    is_staff = models.BooleanField(_('staff'), default=False)
     is_active = models.BooleanField(_('active'), default=True)
 
     objects = EmailUserManager()
+
+    # is_enabled is used to ensure that the account has been verified and
+    # accepted by an administrator.
+    is_enabled = models.BooleanField(_('enabled'), default=False)
 
     # is_superuser provided by PermissionsMixin
     is_deptadmin = models.BooleanField(default=False)
