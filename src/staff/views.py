@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.core.exceptions import PermissionDenied
 
 from .forms import DepartmentAddForm
@@ -23,5 +23,10 @@ def superuser_departments_add(request):
     if request.method == "POST":
         form = DepartmentAddForm(request.POST)
         if form.is_valid():
-            dep = form.add()
-            dep.add()
+            form.save()
+            return redirect("/superuser/departments")
+        else:
+            t_dict = {"add_form": form}
+            return render(request, "staff_departments.html", t_dict)
+    else:
+        return redirect("/superuser/departments")
