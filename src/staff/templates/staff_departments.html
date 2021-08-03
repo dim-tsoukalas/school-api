@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Departments | University{% endblock %}
+
+
+{% block content %}
+
+<div class="form_container">
+    <h2>Add Department</h2>
+    <form method="post" action="/superuser/departments/add">
+        {% csrf_token %}
+        {{ add_form.non_field_errors }}
+        {% for field in add_form %}
+        <div class="base_field">
+
+            {{ field }}
+            {% if field.help_text %}
+            <small style="color: grey">{{ field.help_text }}</small>
+            {% endif %}
+            {% for error in field.errors %}
+            <p style="color: red">{{ error }}</p>
+            {% endfor %}
+        </div>
+        {% endfor %}
+        <input type="submit" value="Add">
+    </form>
+</div>
+
+
+
+
+{% endblock %}

@@ -6,8 +6,8 @@
 
 <div class="form_container">
   <p>You may sign up for an account using one of the forms
-  below. Accounts must be verified and enabled by the administrator
-  before they can be used.</p>
+    below. Accounts must be verified and enabled by the administrator
+    before they can be used.</p>
 </div>
 
 <div class="signup-container">
@@ -18,18 +18,18 @@
       {% csrf_token %}
       {{ student_form.non_field_errors }}
       {% for field in student_form %}
-        <div class="base_field">
+      <div class="base_field">
         {{ field.label_tag }}
         {{ field }}
         {% if field.help_text %}
-          <small style="color: grey">{{ field.help_text }}</small>
+        <small style="color: grey">{{ field.help_text }}</small>
         {% endif %}
         {% for error in field.errors %}
-          <p style="color: red">{{ error }}</p>
-          {% endfor %}
-          </div>
+        <p style="color: red">{{ error }}</p>
         {% endfor %}
-        <input type="submit" value="Sign up">
+      </div>
+      {% endfor %}
+      <input type="submit" value="Sign up">
     </form>
   </div>
 
@@ -43,14 +43,14 @@
         {{ field.label_tag }}
         {{ field }}
         {% if field.help_text %}
-          <small style="color: grey">{{ field.help_text }}</small>
+        <small style="color: grey">{{ field.help_text }}</small>
         {% endif %}
         {% for error in field.errors %}
-          <p style="color: red">{{ error }}</p>
+        <p style="color: red">{{ error }}</p>
         {% endfor %}
       </div>
-    {% endfor %}
-    <input type="submit" value="Sign up">
+      {% endfor %}
+      <input type="submit" value="Sign up">
     </form>
   </div>
 

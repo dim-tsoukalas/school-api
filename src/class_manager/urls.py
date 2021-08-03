@@ -17,6 +17,7 @@ from django.urls import path
 
 import users.views
 import mainpage.views
+import staff.views
 
 urlpatterns = [
     path("", mainpage.views.home, name="home"),
@@ -24,5 +25,17 @@ urlpatterns = [
     path("signout", users.views.signout, name="signout"),
     path("signup", users.views.signup, name="signup"),
     path("signup/student", users.views.signup_student, name="signup_student"),
-    path("signup/teacher", users.views.signup_teacher, name="signup_teacher")
+    path("signup/teacher", users.views.signup_teacher, name="signup_teacher"),
+    # Superuser
+    path("superuser", staff.views.superuser, name="superuser"),
+    path(
+        "superuser/departments",
+        staff.views.superuser_departments,
+        name="superuser_departments",
+    ),
+    path(
+        "superuser/departments/add",
+        staff.views.superuser_departments_add,
+        name="superuser_departments_add",
+    ),
 ]

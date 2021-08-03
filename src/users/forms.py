@@ -13,7 +13,8 @@ from .models import User, Student, Teacher
 
 class StudentSignupForm(UserCreationForm):
     email = forms.EmailField(
-        max_length=255, help_text='Required. Enter a valid email address.')
+        max_length=255, help_text="Required. Enter a valid email address."
+    )
     first_name = forms.CharField(max_length=200, required=True)
     last_name = forms.CharField(max_length=200, required=True)
     registry_id = forms.CharField(max_length=100, required=True)
@@ -21,8 +22,15 @@ class StudentSignupForm(UserCreationForm):
 
     class Meta(UserCreationForm.Meta):
         model = User
-        fields = ["first_name", "last_name", "registry_id", "admission_year",
-                  "email", "password1", "password2"]
+        fields = [
+            "first_name",
+            "last_name",
+            "registry_id",
+            "admission_year",
+            "email",
+            "password1",
+            "password2",
+        ]
 
     @transaction.atomic
     def save(self):
@@ -40,15 +48,15 @@ class StudentSignupForm(UserCreationForm):
 
 class TeacherSignupForm(UserCreationForm):
     email = forms.EmailField(
-        max_length=255, help_text='Required. Enter a valid email address.')
+        max_length=255, help_text="Required. Enter a valid email address."
+    )
     first_name = forms.CharField(max_length=200, required=True)
     last_name = forms.CharField(max_length=200, required=True)
     rank = forms.ChoiceField(choices=Teacher.TeacherRanks.choices)
 
     class Meta(UserCreationForm.Meta):
         model = User
-        fields = ["first_name", "last_name", "rank", "email", "password1",
-                  "password2"]
+        fields = ["first_name", "last_name", "rank", "email", "password1", "password2"]
 
     @transaction.atomic
     def save(self):
@@ -67,35 +75,30 @@ class SigninForm(forms.Form):
     email = forms.EmailField(
         label=_("Email"),
         max_length=User.EMAIL_LENGTH,
-        widget=forms.EmailInput(attrs={
-            'autofocus': False,
-            "placeholder": "Email"
-        })
+        widget=forms.EmailInput(attrs={"autofocus": False, "placeholder": "Email"}),
     )
     password = forms.CharField(
         label=_("Password"),
         strip=False,
-        widget=forms.PasswordInput(attrs={
-            'autocomplete': 'current-password',
-            "placeholder": "Password"
-        })
+        widget=forms.PasswordInput(
+            attrs={"autocomplete": "current-password", "placeholder": "Password"}
+        ),
     )
 
     error_messages = {
-        'invalid_login': _("Incorrect email or password."),
-        'inactive': _("This account is inactive."),
+        "invalid_login": _("Incorrect email or password."),
+        "inactive": _("This account is inactive."),
     }
 
     def clean(self):
         cleaned_data = super().clean()
-        email = cleaned_data.get('email')
-        password = cleaned_data.get('password')
+        email = cleaned_data.get("email")
+        password = cleaned_data.get("password")
         if email and password:
             self.user_cache = authenticate(username=email, password=password)
             if self.user_cache is None:
                 raise ValidationError(
-                    self.error_messages['invalid_login'],
-                    code='invalid_login'
+                    self.error_messages["invalid_login"], code="invalid_login"
                 )
             else:
                 self.confirm_login_allowed(self.user_cache)
@@ -108,6 +111,6 @@ class SigninForm(forms.Form):
     def confirm_login_allowed(self, user):
         if not user.is_active:
             raise ValidationError(
-                self.error_messages['inactive'],
-                code='inactive',
+                self.error_messages["inactive"],
+                code="inactive",
             )

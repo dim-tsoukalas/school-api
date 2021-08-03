@@ -43,7 +43,8 @@ INSTALLED_APPS = [
 
     # User provided
     "mainpage",
-    "users"
+    "users",
+    "staff"
 ]
 
 MIDDLEWARE = [
