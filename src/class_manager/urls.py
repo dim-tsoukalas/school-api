@@ -38,4 +38,8 @@ urlpatterns = [
         staff.views.superuser_departments_add,
         name="superuser_departments_add",
     ),
+    path(
+        "superuser/users", staff.views.superuser_users,
+        name="superuser_users"
+    )
 ]
