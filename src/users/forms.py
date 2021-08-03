@@ -153,7 +153,7 @@ class SigninForm(forms.Form):
         return self.user_cache
 
     def confirm_login_allowed(self, user):
-        if not user.is_enabled:
+        if not user.is_accepted:
             raise ValidationError(
                 self.error_messages["disabled"],
                 code="disabled",
