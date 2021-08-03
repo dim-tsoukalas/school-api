@@ -23,12 +23,15 @@ class EmailUserManager(BaseUserManager):
     def create_superuser(self, email, password, **kwargs):
         kwargs.setdefault('is_staff', True)
         kwargs.setdefault('is_superuser', True)
+        kwargs.setdefault('is_accepted', True)
 
         if kwargs.get('is_staff') is not True:
             raise ValueError(_('Superuser must have is_staff=True.'))
         if kwargs.get('is_superuser') is not True:
             raise ValueError(_('Superuser must have is_superuser=True.'))
-        return self.create_user(email, password, **kwargs)
+        if kwargs.get('is_accepted') is not True:
+            raise ValueError(_('Superuser must have is_accepted=True.'))
+        return self._create_user(email, password, **kwargs)
 
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -46,9 +49,9 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     objects = EmailUserManager()
 
-    # is_enabled is used to ensure that the account has been verified and
+    # is_accepted is used to ensure that the account has been verified and
     # accepted by an administrator.
-    is_enabled = models.BooleanField(_('enabled'), default=False)
+    is_accepted = models.BooleanField(_('accepted'), default=False)
 
     # is_superuser provided by PermissionsMixin
     is_deptadmin = models.BooleanField(default=False)
