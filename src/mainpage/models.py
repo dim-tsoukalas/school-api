@@ -12,10 +12,10 @@ class Department(models.Model):
 class DepartmentStudents(models.Model):
     dept_id = models.ForeignKey(
         "mainpage.Department", on_delete=models.CASCADE)
-    student_id = models.ForeignKey("users.User", on_delete=models.CASCADE)
+    user_id = models.ForeignKey("users.User", on_delete=models.CASCADE)
 
 
 class DepartmentTeachers(models.Model):
     dept_id = models.ForeignKey(
         "mainpage.Department", on_delete=models.CASCADE)
-    teacher_id = models.ForeignKey("users.User", on_delete=models.CASCADE)
+    user_id = models.ForeignKey("users.User", on_delete=models.CASCADE)
