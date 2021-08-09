@@ -2,7 +2,6 @@ from django.shortcuts import render, redirect
 from django.core.exceptions import PermissionDenied
 
 from .forms import DepartmentAddForm
-from users.models import Teacher, Student
 
 
 def superuser(request):
@@ -31,21 +30,3 @@ def superuser_departments_add(request):
             return render(request, "staff_departments.html", t_dict)
     else:
         return redirect("/superuser/departments")
-
-
-def superuser_users(request):
-    if not request.user.is_superuser:
-        raise PermissionDenied
-
-    max_rows = request.session.get("su_users_max_rows", 30)
-    teachers_page = request.session.get("su_users_t_page", 1)
-    students_page = request.session.get("su_users_s_page", 1)
-
-    teachers = Teacher.objects.all()
-
-    students = Student.objects.all()
-
-    t_dict = {"students": students,
-              "teachers": teachers}
-
-    return render(request, "staff_users.html", t_dict)
