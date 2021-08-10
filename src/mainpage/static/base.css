@@ -169,17 +169,59 @@ header {
 
 
 /*
- * Content
+ * Containers & Content
  */
 
 .content {
     background-color: ;
 }
 
+.basic-box-container {
+    box-sizing: border-box;
+    border: 1px solid #fff;
+    border-radius: 10px;
+    background-color: #eee;
+    padding: 15px;
+    margin: 10px;
+}
 
-/*
- * Sign up
- */
+
+/* modal */
+
+#modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+}
+
+#modal-container {
+    background-color: #fefefe;
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; /* Could be more or less, depending on screen size */
+}
+
+#modal-close {
+    float: right;
+    padding: 0 5px;
+    font-weight: bold;
+    font-size: 1.7em;
+    cursor: default;
+}
+
+#modal-close:hover {
+    background-color: red;
+}
+
+
+/* Sign up */
 
 .signup-container {
     display: flex;
@@ -203,7 +245,6 @@ header {
 .form_container p {
     text-align: center;
 }
-
 
 .form_container label {
     padding: 0 0 3px 0;
@@ -242,4 +283,26 @@ header {
     border-color: #000;
 }
 
+/* staff: users */
 
+.user-insert-form {
+    margin-bottom: 15px;
+}
+
+.user-insert-form input {
+    border: none;
+}
+
+/*
+ * Tables
+ */
+
+/* staff: users */
+
+.tr-user-not-accepted {
+    background-color: #ffd485;
+}
+
+.tr-user-not-active {
+    color: #b0b0b0;
+}
