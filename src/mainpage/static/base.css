@@ -220,6 +220,45 @@ header {
     background-color: red;
 }
 
+/* entity */
+
+.entity-container {
+    margin-top: 15px;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.entity-box {
+    margin: 5px;
+    min-width: 200px;
+    max-width: 300px;
+}
+
+.entity-box-title {
+    background-color: #222;
+    color: #eee;
+    font-size: 1.2em;
+    font-weight: bold;
+    text-align: center;
+    padding: 3px;
+}
+
+.entity-box-content {
+    height: calc(4.8em + 15px); /* 4x line-height + padding */
+    line-height: 1.2em;
+    padding: 5px 10px;
+    background-color: #fff;
+    overflow-wrap: break-word;
+    hyphens: auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.entity-box-menu {
+    border-top: 1px solid #222;
+    padding: 5px;
+}
+
 
 /* Sign up */
 
