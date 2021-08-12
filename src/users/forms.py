@@ -7,17 +7,18 @@ from django.utils.translation import gettext_lazy as _
 
 from .models import User, Student, Teacher, Deptadmin
 from mainpage.models import Department, DepartmentStudents, DepartmentTeachers
+from mainpage.forms import DepartmentChoiceField
 
 import datetime
 
 
 # ====================================================================
-# Helpers
+# Fields
 # ====================================================================
 
-class DepartmentChoiceField(forms.ModelChoiceField):
+class TeacherChoiceField(forms.ModelChoiceField):
     def label_from_instance(self, obj):
-        return obj.name
+        return f"{obj.first_name} {obj.last_name} ({obj.user.email})"
 
 
 # ====================================================================
