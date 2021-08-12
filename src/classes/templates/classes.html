@@ -1,0 +1,353 @@
+{% extends "base.html" %}
+
+{% block title %}Classes | {{ dept_name }} | University{% endblock %}
+
+
+{% block content %}
+
+<div id="modal">
+  <div id="modal-container">
+    <span id="modal-close">&times;</span>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+
+<div class="basic-box-container">
+  <h2>{{ dept_name }} Classes</h2>
+  {% if is_admin or is_teacher %}
+  <div id="classes-menu">
+    <a id="class-insert-a" href="/departments/{{dept_id}}/classes/insert">Insert</a>
+  </div>
+  {% endif %}
+
+  <div class="entity-container">
+    {% for i in classes %}
+    <div class="entity-box">
+      <div class="entity-box-title">{{ i.name }}</div>
+      <div class="entity-box-content">{{ i.description }}</div>
+      <div class="entity-box-menu">
+        <a class="class-view-a"
+           href="/departments/{{dept_id}}/classes/{{i.public_id}}">
+          {% if is_admin or is_teacher %} Details/Edit
+          {% else %} Details
+          {% endif %}
+        </a>
+        {% if is_admin %}
+        <a class="class-delete-a"
+           href="/departments/{{dept_id}}/classes/{{i.public_id}}/delete">
+          Delete
+        </a>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+  const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+  var parser = new DOMParser();
+
+  // Setup the event listeners
+  document.getElementById("deptadmin-insert-btn").addEventListener(
+      "click", e => show_user_insert_form(e, "deptadmin")
+  );
+  document.getElementById("teacher-insert-btn").addEventListener(
+      "click", e => show_user_insert_form(e, "teacher")
+  );
+  document.getElementById("student-insert-btn").addEventListener(
+      "click", e => show_user_insert_form(e, "student")
+  );
+  setup_user_update_anchor(document);
+  setup_user_action_events(document);
+
+
+  // Modal setup
+
+  var modal = document.getElementById("modal");
+  var modal_content = document.getElementById("modal-content");
+  var modal_close = document.getElementById("modal-close");
+  modal_close.addEventListener("click", e => modal_hide());
+  // Close the modal if the user clicks outside modal_content
+  modal.addEventListener("click", e => {
+      if (e.target == modal) {
+          modal_hide();
+      }
+  });
+
+  function modal_hide()
+  {
+      modal.style.display = "none";
+  }
+
+  function modal_set_content(content)
+  {
+      modal_content.replaceChildren(content);
+  }
+
+  function modal_show(content)
+  {
+      modal_set_content(content);
+      modal.style.display = "block";
+  }
+
+
+  // Event listener setup
+
+  function setup_user_update_anchor(target)
+  {
+      for (let a of target.getElementsByClassName("user-update-a")) {
+          a.addEventListener("click", e => show_user_update_form(e, a));
+      }
+  }
+
+
+  function setup_user_action_events(target)
+  {
+      for (let form of target.getElementsByClassName("user-action-form")) {
+          let user_id = form.querySelector('[name=user_id]').value;
+
+          switch (form.action.value) {
+          case "accept":
+              form.addEventListener("submit", e => user_accept(e, user_id));
+              break;
+          case "delete":
+              form.addEventListener("submit", e => user_delete(e, user_id));
+              break;
+          case "activate":
+              form.addEventListener("submit", e => user_activate(e, user_id));
+              break;
+          case "deactivate":
+              form.addEventListener("submit", e => user_deactivate(e, user_id));
+              break;
+          }
+      }
+  }
+
+
+  // Student insert
+
+  function show_user_insert_form(e, mode)
+  {
+      var xhr = new XMLHttpRequest();
+      if (!xhr) {
+          return;
+      }
+      xhr.onreadystatechange = () => {
+          if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+              let html = parser.parseFromString(xhr.responseText, 'text/html');
+              let form = html.getElementById("insert-" + mode + "-form");
+              form.addEventListener("submit", e => user_insert(e, mode, form));
+              modal_show(form);
+          }
+      };
+      xhr.open("GET", "/users?action=insert_" + mode);
+      xhr.send(null);
+      e.preventDefault();
+  }
+
+  function user_insert(e, mode, form) {
+      if (mode === "student") {
+          var form_id = "insert-student-form";
+          var table_id = "students-table";
+      } else if (mode === "teacher") {
+          var form_id = "insert-teacher-form";
+          var table_id = "teachers-table";
+      } else if (mode === "deptadmin") {
+          var form_id = "insert-deptadmin-form";
+          var table_id = "deptadmins-table";
+      }
+
+      var xhr = new XMLHttpRequest();
+      if (!xhr) {
+          return;
+      }
+      xhr.onreadystatechange = () => {
+          if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+              let form = xhr.responseXML.getElementById(form_id);
+              if (form == null) {
+                  let table = xhr.responseXML.getElementById(table_id);
+                  setup_user_action_events(table);
+                  setup_user_update_anchor(table);
+                  document.getElementById(table_id).replaceWith(table);
+                  modal_hide();
+                  return;
+              }
+              form.addEventListener("submit", e => user_insert(e, mode, form));
+              modal_set_content(form);
+          }
+      };
+      xhr.open("POST", "/users");
+      xhr.responseType = "document";  // Init the HTML parser
+      xhr.send(new FormData(form));
+      e.preventDefault();
+  }
+
+
+  // User update
+
+  function show_user_update_form(e, a)
+  {
+      var xhr = new XMLHttpRequest();
+      if (!xhr) {
+          return;
+      }
+      xhr.onreadystatechange = () => {
+          if (xhr.readyState === XMLHttpRequest.DONE) {
+              if (xhr.status === 200) {
+                  let form = xhr.responseXML.getElementById("student-update-form");
+                  let mode = 'student';
+                  if (form == null) {
+                      form = xhr.responseXML.getElementById("teacher-update-form");
+                      mode = "teacher";
+                  }
+                  if (form == null) {
+                      form = xhr.responseXML.getElementById("deptadmin-update-form");
+                      mode = "deptadmin";
+                  }
+                  form.addEventListener("submit", e => user_update(e, form, mode));
+                  modal_show(form);
+              }
+          }
+      };
+      xhr.open("GET", a.href);
+      xhr.responseType = "document";  // Init the HTML parser
+      xhr.send(null);
+      e.preventDefault();
+  }
+
+  function user_update(e, form, mode) {
+      if (mode === "student") {
+          var form_id = "student-update-form";
+          var table_id = "students-table";
+      } else if (mode === "teacher") {
+          var form_id = "teacher-update-form";
+          var table_id = "teachers-table";
+      } else if (mode === "deptadmin") {
+          var form_id = "deptadmin-update-form";
+          var table_id = "deptadmins-table";
+      }
+
+      var xhr = new XMLHttpRequest();
+      if (!xhr) {
+          return;
+      }
+      xhr.onreadystatechange = () => {
+          if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+              let form = xhr.responseXML.getElementById(form_id);
+              if (form == null) {
+                  let table = xhr.responseXML.getElementById(table_id);
+                  setup_user_action_events(table);
+                  setup_user_update_anchor(table);
+                  document.getElementById(table_id).replaceWith(table);
+                  modal_hide();
+                  return;
+              }
+              form.addEventListener("submit", e => user_update(e, form, mode));
+              modal_set_content(form);
+          }
+      };
+      xhr.open("POST", form.getAttribute("action"));
+      xhr.responseType = "document";  // Init the HTML parser
+      xhr.send(new FormData(form));
+      e.preventDefault();
+  }
+
+
+  // User actions
+
+  function user_accept(e, user_id)
+  {
+      var xhr = new XMLHttpRequest();
+      if (!xhr) {
+          return;  // Let the input submit as a fallback
+      }
+      xhr.onreadystatechange = () => {
+          if (xhr.readyState === XMLHttpRequest.DONE) {
+              if (xhr.status === 200) {
+                  let html = parser.parseFromString(xhr.responseText, 'text/html');
+                  let new_tr = html.getElementById("user_" + user_id);
+                  document.getElementById("user_" + user_id).replaceWith(new_tr);
+                  setup_user_action_events(new_tr);
+                  setup_user_update_anchor(new_tr);
+              }
+          }
+      };
+      xhr.open("POST", "/users/" + user_id);
+      xhr.setRequestHeader("X-CSRFToken", csrftoken);
+      xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+      xhr.send("action=accept&user_id=" + user_id);
+      e.preventDefault();  // Prevent the form from submitting
+  }
+
+  function user_delete(e, user_id)
+  {
+      var xhr = new XMLHttpRequest();
+      if (!xhr) {
+          return;  // Let the input submit as a fallback
+      }
+      xhr.onreadystatechange = () => {
+          if (xhr.readyState === XMLHttpRequest.DONE) {
+              if (xhr.status === 200) {
+                  document.getElementById("user_" + user_id).remove();
+              }
+          }
+      };
+      xhr.open("POST", "/users/" + user_id);
+      xhr.setRequestHeader("X-CSRFToken", csrftoken);
+      xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+      xhr.send("action=delete&user_id=" + user_id);
+      e.preventDefault();  // Prevent the form from submitting
+  }
+
+  function user_activate(e, user_id)
+  {
+      var xhr = new XMLHttpRequest();
+      if (!xhr) {
+          return;  // Let the input submit as a fallback
+      }
+      xhr.onreadystatechange = () => {
+          if (xhr.readyState === XMLHttpRequest.DONE) {
+              if (xhr.status === 200) {
+                  let html = parser.parseFromString(xhr.responseText, 'text/html');
+                  let new_tr = html.getElementById("user_" + user_id);
+                  document.getElementById("user_" + user_id).replaceWith(new_tr);
+                  setup_user_action_events(new_tr);
+                  setup_user_update_anchor(new_tr);
+              }
+          }
+      };
+      xhr.open("POST", "/users/" + user_id);
+      xhr.setRequestHeader("X-CSRFToken", csrftoken);
+      xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+      xhr.send("action=activate&user_id=" + user_id);
+      e.preventDefault();  // Prevent the form from submitting
+  }
+
+  function user_deactivate(e, user_id)
+  {
+      var xhr = new XMLHttpRequest();
+      if (!xhr) {
+          return;  // Let the input submit as a fallback
+      }
+      xhr.onreadystatechange = () => {
+          if (xhr.readyState === XMLHttpRequest.DONE) {
+              if (xhr.status === 200) {
+                  let html = parser.parseFromString(xhr.responseText, 'text/html');
+                  let new_tr = html.getElementById("user_" + user_id);
+                  document.getElementById("user_" + user_id).replaceWith(new_tr);
+                  setup_user_action_events(new_tr);
+                  setup_user_update_anchor(new_tr);
+              }
+          }
+      };
+      xhr.open("POST", "/users/" + user_id);
+      xhr.setRequestHeader("X-CSRFToken", csrftoken);
+      xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+      xhr.send("action=deactivate&user_id=" + user_id);
+      e.preventDefault();  // Prevent the form from submitting
+  }
+
+</script>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+
+{% block title %}Insert class | {{dept_name}} | University{% endblock %}
+
+
+{% block content %}
+
+<form id="insert-class-form" method="post" action="/departments/{{dept_id}}/classes">
+  <input type="hidden" name="action" value="insert">
+
+  {% csrf_token %}
+  {{ form.non_field_errors }}
+  <table>
+    <tbody>
+      {% for field in form %}
+
+      {% if field.name == "department" %}
+      {{ field.as_hidden }}
+      {% else  %}
+      <tr>
+        <td>{{ field.label_tag }}</td>
+        <td>{{ field }}</td>
+        {% for error in field.errors %}<td>
+        <td style="color: red">{{ error }}</td>
+        {% endfor %}
+      </tr>
+      {% endif %}
+
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <input type="submit" value="Insert class">
+
+</form>
+
+{% endblock %}
