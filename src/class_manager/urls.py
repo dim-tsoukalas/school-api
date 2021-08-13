@@ -33,16 +33,17 @@ urlpatterns = [
     path("users/<int:uid>/update", users.views.user_update),
     # Superuser
     path("superuser", staff.views.superuser, name="superuser"),
-    path(
-        "superuser/departments",
-        staff.views.superuser_departments,
-        name="superuser_departments",
-    ),
-    path(
-        "superuser/departments/add",
-        staff.views.superuser_departments_add,
-        name="superuser_departments_add",
-    ),
+    path("superuser/departments", staff.views.superuser_departments,
+         name="superuser_departments"),
+    path("superuser/departments/add", staff.views.superuser_departments_add,
+         name="superuser_departments_add"),
+    # Departments
+    path("departments", mainpage.views.departments, name="departments"),
+    path("departments/insert", mainpage.views.departments_insert),
+    path("departments/<int:dept_id>/update",
+         mainpage.views.departments_update),
+    path("departments/<int:dept_id>/delete",
+         mainpage.views.departments_delete),
     # Classes
     path("departments/<int:dept_id>/classes",
          classes.views.classes, name="classes"),
