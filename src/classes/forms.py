@@ -17,22 +17,35 @@ from .models import Classes, Teaching
 # ====================================================================
 
 class ClassInsertForm(forms.ModelForm):
-    department = DepartmentChoiceField(
-        queryset=Department.objects.all(),
-        required=True
-    )
 
-    error_messages = {
-        "public_id_exists": _("A class with this Id already exists."),
-        "name_exists": _("A class with this name already exists."),
-    }
+    def __init__(self, department, *args, **kwargs):
+        super(ClassInsertForm, self).__init__(*args, **kwargs)
+        self.department = department
 
     class Meta:
         model = Classes
-        fields = ["department", "public_id", "name", "description"]
+        fields = ["public_id", "name", "description"]
         widgets = {
             "description": forms.Textarea()
         }
+
+    def clean(self):
+        cleaned_data = self.cleaned_data
+        exists = Classes.objects.filter(
+            name=cleaned_data["name"],
+            department=self.department
+        ).exists()
+
+        if exists and not self._is_update_mode():
+            raise ValidationError("Class with this name already exists.")
+
+        return cleaned_data
+
+    def _is_update_mode(self):
+        return self.instance == Classes.objects.get(
+            name=self.cleaned_data["name"],
+            department=self.department
+        )
 
 
 # ====================================================================
