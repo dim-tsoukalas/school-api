@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Classes | {{ dept.name }} | University{% endblock %}
+
+
+{% block content %}
+
+<div id="modal">
+  <div id="modal-container">
+    <span id="modal-close">&times;</span>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+
+<div class="basic-box-container">
+  <h2>{{ dept.name }} Classes</h2>
+  {% if perm.is_admin or perm.is_teacher %}
+  <div id="classes-menu">
+    <a id="class-insert-a" href="/departments/{{dept.id}}/classes/insert">Insert</a>
+  </div>
+  {% endif %}
+
+  <div class="entity-container">
+    {% for i in classes %}
+    <div class="entity-box">
+      <div class="entity-box-title">{{ i.name }}</div>
+      <div class="entity-box-content">{{ i.description }}</div>
+      <div class="entity-box-menu">
+        <a class="class-view-a"
+           href="/departments/{{dept.id}}/classes/{{i.public_id}}">
+          {% if perm.is_admin or perm.is_teacher %} Details/Edit
+          {% else %} Details
+          {% endif %}
+        </a>
+        {% if perm.is_admin %}
+        <a class="class-delete-a"
+           href="/departments/{{dept.id}}/classes/{{i.public_id}}/delete">
+          Delete
+        </a>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+{% endblock %}

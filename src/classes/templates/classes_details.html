@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}Classes | {{ dept.name }} | University{% endblock %}
+
+
+{% block content %}
+
+<div id="modal">
+  <div id="modal-container">
+    <span id="modal-close">&times;</span>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+
+<div class="basic-box-container">
+  <h2>{{ class.name }} [{{ class.public_id }}]</h2>
+
+  {% if not class.description %}
+  <p>No description for this class.</p>
+  {% else %}
+  <p>{{class.description}}</p>
+  {% endif %}
+
+  {% if perm.is_admin or perm.is_teacher %}
+  <div class="entity-box-menu">
+    <a id="class-info-edit-a"
+       href="/departments/{{dept.id}}/classes/{{class.public_id}}/info/update">
+      Edit
+    </a>
+  </div>
+  {% endif %}
+</div>
+
+
+<div class="basic-box-container">
+  <h3>Prerequisite Classes</h3>
+  {% for i in class.req_classes %}
+  <a href="/departments/{{dept.id}}/classes/{{i.prerequisite_id.public_id}}">
+    i.prerequisite_id.name
+  </a>
+  {% endfor %}
+
+  {% if not class.req_classes %}
+  <p>No prerequisite classes for this class.</p>
+  {% endif %}
+
+  {% if perm.is_admin or perm.is_teacher %}
+  <div class="entity-box-menu">
+    <a id="req-classes-edit-a" href="">Edit</a>
+  </div>
+  {% endif %}
+</div>
+
+
+{% if perm.is_admin or perm.is_teacher %}
+<div class="basic-box-container">
+  <h3>Teachings</h3>
+
+  {% if not class.teachings %}
+  <p>No teaching was found for this class.</p>
+
+  {% else %}
+  <table>
+    <thead>
+      <th>Year</th>
+      <th>Semester</th>
+      <th>Teacher</th>
+      <th>Theory weight</th>
+      <th>Lab weight</th>
+      <th>Theory limit</th>
+      <th>Lab limit</th>
+    </thead>
+    <tbody>
+      {% for i in class.teachings %}
+      <tr>
+        <td>{{ i.year }}</td>
+        <td>{{ i.semester }}</td>
+        <td>{{ i.teacher.first_name }} {{ i.teacher.last_name }} ({{ i.teacher.user.email }})</td>
+        <td>{{ i.theory_weight }}</td>
+        <td>{{ i.lab_weight }}</td>
+        <td>{{ i.theory_limit }}</td>
+        <td>{{ i.lab_limit }}</td>
+        <td>
+          <a class="teaching-update-a"
+             href="/departments/{{dept.id}}/classes/{{class.public_id}}/teaching/{{i.id}}/update">
+            Edit
+          </a>
+        </td>
+        <td>
+          <a class="teaching-delete-a"
+             href="/departments/{{dept.id}}/classes/{{class.public_id}}/teaching/{{i.id}}/delete">
+            Delete
+          </a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+
+  {% if perm.is_admin or perm.is_teacher %}
+  <div class="entity-box-menu">
+    <a id="teaching-add-a"
+       href="/departments/{{dept.id}}/classes/{{class.public_id}}/teaching/insert">
+      Add
+    </a>
+  </div>
+  {% endif %}
+</div>
+{% endif %}
+
+{% endblock %}

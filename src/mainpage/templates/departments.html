@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Departments | University{% endblock %}
+
+
+{% block content %}
+
+<div class="basic-box-container">
+  <h2>Departments</h2>
+  {% if user.is_superuser %}
+  <div id="departments-menu">
+    <a id="dept-insert-a" href="/departments/insert">Insert</a>
+  </div>
+  {% endif %}
+
+  <div class="entity-container">
+    {% for i in departments %}
+    <div class="entity-box">
+      <div class="entity-box-title">{{ i.name }}</div>
+      <div class="entity-box-content">{{ i.description }}</div>
+      <div class="entity-box-menu">
+        <a class="dept-classes-a" href="/departments/{{i.id}}/classes">
+          Classes
+        </a>
+        {% if user.is_superuser %}
+        <a class="dept-edit-a" href="/departments/{{i.id}}/update">
+          Edit
+        </a>
+        <a class="dept-delete-a" href="/departments/{{i.id}}/delete">
+          Delete
+        </a>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+{% endblock %}

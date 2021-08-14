@@ -3,10 +3,10 @@ from django.db import models
 
 class Department(models.Model):
     NAME_LENGTH = 200
-    name = models.CharField(max_length=NAME_LENGTH, unique=True)
+    DESCRIPTION_LENGTH = 512
 
-    def get_department_names():
-        return Department.objects.only("name")
+    name = models.CharField(max_length=NAME_LENGTH, unique=True)
+    description = models.CharField(max_length=DESCRIPTION_LENGTH, blank=True)
 
 
 class DepartmentStudents(models.Model):

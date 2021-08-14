@@ -44,7 +44,8 @@ INSTALLED_APPS = [
     # User provided
     "mainpage",
     "users",
-    "staff"
+    "staff",
+    "classes"
 ]
 
 MIDDLEWARE = [

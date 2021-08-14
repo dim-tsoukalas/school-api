@@ -18,6 +18,7 @@ from django.urls import path
 import users.views
 import mainpage.views
 import staff.views
+import classes.views
 
 urlpatterns = [
     path("", mainpage.views.home, name="home"),
@@ -32,14 +33,35 @@ urlpatterns = [
     path("users/<int:uid>/update", users.views.user_update),
     # Superuser
     path("superuser", staff.views.superuser, name="superuser"),
-    path(
-        "superuser/departments",
-        staff.views.superuser_departments,
-        name="superuser_departments",
-    ),
-    path(
-        "superuser/departments/add",
-        staff.views.superuser_departments_add,
-        name="superuser_departments_add",
-    ),
+    path("superuser/departments", staff.views.superuser_departments,
+         name="superuser_departments"),
+    path("superuser/departments/add", staff.views.superuser_departments_add,
+         name="superuser_departments_add"),
+    # Departments
+    path("departments", mainpage.views.departments, name="departments"),
+    path("departments/insert", mainpage.views.departments_insert),
+    path("departments/<int:dept_id>/update",
+         mainpage.views.departments_update),
+    path("departments/<int:dept_id>/delete",
+         mainpage.views.departments_delete),
+    # Classes
+    path("departments/<int:dept_id>/classes",
+         classes.views.classes, name="classes"),
+    path("departments/<int:dept_id>/classes/<str:class_public_id>/delete",
+         classes.views.delete),
+    path("departments/<int:dept_id>/classes/insert", classes.views.insert,
+         name="classes/insert"),
+    path("departments/<int:dept_id>/classes/<str:class_public_id>",
+         classes.views.details, name="class"),
+    path("departments/<int:dept_id>/classes/<str:class_public_id>/info/update",
+         classes.views.info_update),
+    path(("departments/<int:dept_id>/classes/<str:class_public_id>"
+          "/teaching/insert"),
+         classes.views.teaching_insert),
+    path(("departments/<int:dept_id>/classes/<str:class_public_id>"
+          "/teaching/<int:teaching_id>/update"),
+         classes.views.teaching_update),
+    path(("departments/<int:dept_id>/classes/<str:class_public_id>"
+          "/teaching/<int:teaching_id>/delete"),
+         classes.views.teaching_delete),
 ]

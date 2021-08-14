@@ -19,6 +19,7 @@
         </div>
       </nav>
       <nav class="main-menu">
+        {% block main_menu_content %}{% endblock %}
         {% if not user.is_authenticated %}
 
             {% comment %} Requires: signin_form {% endcomment %}
@@ -29,7 +30,6 @@
              {% include "superuser_menu.html" %}
 
         {% endif %}
-        {% block main_menu_content %}{% endblock %}
       </nav>
     </header>
 

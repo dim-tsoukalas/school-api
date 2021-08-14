@@ -1,17 +1,17 @@
-{% if signin_form %}
+{% if user.signin_form %}
   <div class="signinbar">
     <form method="post" action="/signin">
       {% csrf_token %}
 
-      {% if signin_form.non_field_errors %}
+      {% if user.signin_form.non_field_errors %}
 
-          {% for error in signin_form.non_field_errors %}
+          {% for error in user.signin_form.non_field_errors %}
               <label>{{ error }}</label>
           {% endfor %}
 
       {% else %}
 
-           {% for field in signin_form %}
+           {% for field in user.signin_form %}
                {% for error in field.errors %}
                    <label style="color: red">{{ error }}</label>
                {% endfor %}
@@ -19,7 +19,7 @@
 
       {% endif %}
 
-      {% for field in signin_form %}
+      {% for field in user.signin_form %}
           {{ field }}
       {% endfor %}
       <input type="submit" value="Sign in">
