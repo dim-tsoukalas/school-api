@@ -15,12 +15,20 @@ from .forms import DepartmentAddForm
 def init_render_dict(request):
     t_dict = {
         "user": {
+            "object": request.user,
             "is_superuser": request.user.is_superuser,
             "is_authenticated": request.user.is_authenticated
         }
     }
 
-    if not request.user.is_authenticated:
+    if request.user.is_authenticated:
+        t_dict["user"].update({
+            "id": request.user.id,
+            "is_teacher": request.user.is_teacher,
+            "is_student": request.user.is_student,
+            "is_deptadmin": request.user.is_deptadmin
+        })
+    else:
         t_dict["user"]["signin_form"] = SigninForm()
 
     return t_dict
