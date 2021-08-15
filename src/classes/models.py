@@ -25,6 +25,9 @@ class PrerequisiteClasses(models.Model):
     prerequisite_id = models.ForeignKey(
         Classes, related_name="class_id", on_delete=models.CASCADE)
 
+    class Meta:
+        unique_together = ("class_id", "prerequisite_id")
+
 
 class Teaching(models.Model):
     class_id = models.ForeignKey(Classes, on_delete=models.CASCADE)
@@ -37,11 +40,11 @@ class Teaching(models.Model):
     semester = models.CharField(max_length=15, choices=Semesters.choices)
     teacher = models.ForeignKey("users.Teacher", on_delete=models.CASCADE)
 
-    # Allow from 1% to 99%. If either is 100%, both must be set to null.
+    # Both of them should amount to 1.00. Both must be set.
     theory_weight = models.DecimalField(
-        max_digits=2, decimal_places=2, blank=True, null=True)
+        max_digits=3, decimal_places=2, blank=True, null=True)
     lab_weight = models.DecimalField(
-        max_digits=2, decimal_places=2, blank=True, null=True)
+        max_digits=3, decimal_places=2, blank=True, null=True)
 
     theory_limit = models.CharField(max_length=4, blank=True)
     lab_limit = models.CharField(max_length=4, blank=True)
