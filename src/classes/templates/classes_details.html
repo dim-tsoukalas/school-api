@@ -35,11 +35,29 @@
 
 <div class="basic-box-container">
   <h3>Prerequisite Classes</h3>
-  {% for i in class.req_classes %}
-  <a href="/departments/{{dept.id}}/classes/{{i.prerequisite_id.public_id}}">
-    i.prerequisite_id.name
-  </a>
-  {% endfor %}
+  <table>
+    <thead>
+      <th>Class name</th>
+    </thead>
+    <tbody>
+      {% for i in class.req_classes %}
+      <tr>
+        <td>
+          <a href="/departments/{{dept.id}}/classes/{{i.prerequisite_id.public_id}}">
+            {{i.prerequisite_id.name}}
+          </a>
+        </td>
+        {% if perm.is_admin or perm.is_teacher %}
+        <td>
+          <a href="/departments/{{dept.id}}/classes/{{class.public_id}}/prerequisites/{{i.id}}/delete">
+            Delete
+          </a>
+        </td>
+        {% endif %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 
   {% if not class.req_classes %}
   <p>No prerequisite classes for this class.</p>
@@ -47,13 +65,16 @@
 
   {% if perm.is_admin or perm.is_teacher %}
   <div class="entity-box-menu">
-    <a id="req-classes-edit-a" href="">Edit</a>
+    <a id="req-classes-edit-a"
+       href="/departments/{{dept.id}}/classes/{{class.public_id}}/prerequisites/insert">
+      Add
+    </a>
   </div>
   {% endif %}
 </div>
 
 
-{% if perm.is_admin or perm.is_teacher %}
+{% if user.is_authenticated %}
 <div class="basic-box-container">
   <h3>Teachings</h3>
 
@@ -81,25 +102,29 @@
         <td>{{ i.lab_weight }}</td>
         <td>{{ i.theory_limit }}</td>
         <td>{{ i.lab_limit }}</td>
+        {% if perm.is_admin or perm.is_teacher and user.object.email == i.teacher.user.email %}
         <td>
           <a class="teaching-update-a"
              href="/departments/{{dept.id}}/classes/{{class.public_id}}/teaching/{{i.id}}/update">
             Edit
           </a>
         </td>
+        {% endif %}
+        {% if perm.is_admin %}
         <td>
           <a class="teaching-delete-a"
              href="/departments/{{dept.id}}/classes/{{class.public_id}}/teaching/{{i.id}}/delete">
             Delete
           </a>
         </td>
+        {% endif %}
       </tr>
       {% endfor %}
     </tbody>
   </table>
   {% endif %}
 
-  {% if perm.is_admin or perm.is_teacher %}
+  {% if perm.is_admin %}
   <div class="entity-box-menu">
     <a id="teaching-add-a"
        href="/departments/{{dept.id}}/classes/{{class.public_id}}/teaching/insert">
