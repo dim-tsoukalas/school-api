@@ -27,7 +27,11 @@
 
         {% elif user.is_superuser %}
 
-             {% include "superuser_menu.html" %}
+            {% include "superuser_menu.html" %}
+
+        {% elif user.is_teacher %}
+
+            {% include "teacher_menu.html" %}
 
         {% endif %}
       </nav>
