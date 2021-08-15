@@ -56,6 +56,12 @@ urlpatterns = [
     path("departments/<int:dept_id>/classes/<str:class_public_id>/info/update",
          classes.views.info_update),
     path(("departments/<int:dept_id>/classes/<str:class_public_id>"
+          "/prerequisites/insert"),
+         classes.views.prerequisites_insert),
+    path(("departments/<int:dept_id>/classes/<str:class_public_id>"
+          "/prerequisites/<int:req_id>/delete"),
+         classes.views.prerequisites_delete),
+    path(("departments/<int:dept_id>/classes/<str:class_public_id>"
           "/teaching/insert"),
          classes.views.teaching_insert),
     path(("departments/<int:dept_id>/classes/<str:class_public_id>"
@@ -64,4 +70,5 @@ urlpatterns = [
     path(("departments/<int:dept_id>/classes/<str:class_public_id>"
           "/teaching/<int:teaching_id>/delete"),
          classes.views.teaching_delete),
+    path("users/<int:user_id>/classes", classes.views.user_classes)
 ]
