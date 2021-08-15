@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}My Classes | University{% endblock %}
+
+
+{% block content %}
+
+<div id="modal">
+  <div id="modal-container">
+    <span id="modal-close">&times;</span>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+
+<div class="basic-box-container">
+  <h2>My Classes</h2>
+
+  <div class="entity-container">
+    {% for i in teachings %}
+    <div class="entity-box">
+      <div class="entity-box-title">{{ i.class_id.name }}</div>
+      <div class="entity-box-content">
+        <table>
+          <tr><td>{{i.year}}</td><td>{{i.semester}} semester</td></tr>
+          <tr>
+            <td>Theory weight</td>
+            {% if i.theory_weight is None %} <td>Not set</td>
+            {% else %} <td>{{i.theory_weight}}</td>
+            {% endif %}
+          </tr>
+          <tr>
+            <td>Lab weight</td>
+            {% if i.lab_weight is None %} <td>Not set</td>
+            {% else %} <td>{{i.lab_weight}}</td>
+            {% endif %}
+          </tr>
+        </table>
+      </div>
+      <div class="entity-box-menu">
+        <a class="class-view-a"
+           href="/departments/{{i.class_id.department.id}}/classes/{{i.class_id.public_id}}">
+          Details
+        </a>
+        <a class="class-update-a"
+           href="/departments/{{i.class_id.department.id}}/classes/{{i.class_id.public_id}}/teaching/{{i.id}}/update">
+          Edit
+        </a>
+        <a class="class-update-a"
+           href="/departments/{{i.class_id.department.id}}/classes/{{i.class_id.public_id}}/teaching/{{i.id}}/update">
+          Marks
+        </a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+{% endblock %}
