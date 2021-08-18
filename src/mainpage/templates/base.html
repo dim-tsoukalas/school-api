@@ -33,6 +33,10 @@
 
             {% include "teacher_menu.html" %}
 
+        {% elif user.is_student %}
+
+            {% include "student_menu.html" %}
+
         {% endif %}
       </nav>
     </header>
