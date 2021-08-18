@@ -1,5 +1,6 @@
 from django.db import models
-from django.utils.translation import gettext_lazy as _
+
+from mainpage.models import Semesters
 
 
 class Classes(models.Model):
@@ -32,10 +33,6 @@ class PrerequisiteClasses(models.Model):
 class Teaching(models.Model):
     class_id = models.ForeignKey(Classes, on_delete=models.CASCADE)
     year = models.CharField(max_length=4)
-
-    class Semesters(models.TextChoices):
-        FIRST = "first", _("First Semester")  # xeimerino
-        SECOND = "second", _("Second Semester")  # earino
 
     semester = models.CharField(max_length=15, choices=Semesters.choices)
     teacher = models.ForeignKey("users.Teacher", on_delete=models.CASCADE)
