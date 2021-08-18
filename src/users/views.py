@@ -1,29 +1,23 @@
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth import login, logout
 from django.shortcuts import render, redirect
+from django.db.models import Max
 
 from mainpage.models import DepartmentStudents, DepartmentTeachers
 
 from .models import User, Teacher, Student, Deptadmin
-from .forms import (UserActionForm,
-                    StudentSignupForm, StudentUpdateForm,
-                    TeacherSignupForm, TeacherUpdateForm,
-                    DeptadminSignupForm, DeptadminUpdateForm,
-                    SigninForm)
+from .forms import (
+    UserActionForm,
+    StudentSignupForm, StudentUpdateForm, StudentClassSignupForm,
+    TeacherSignupForm, TeacherUpdateForm,
+    DeptadminSignupForm, DeptadminUpdateForm,
+    SigninForm
+)
 
 
 # ====================================================================
 # Helpers
 # ====================================================================
-
-def init_render_dict(request):
-    if request.user.is_superuser:
-        return {
-            "students": make_table_students(Student.objects.all()),
-            "teachers": make_table_teachers(Teacher.objects.all()),
-            "deptadmins": make_table_deptadmins(Deptadmin.objects.all())
-        }
-
 
 def get_user_type(user):
     try:
@@ -139,11 +133,10 @@ def make_table_deptadmins(deptadmins):
 # ====================================================================
 
 def users(request):
-    if request.method == "GET":
-        return users_get(request)
-
     if request.method == "POST":
         return users_post(request)
+
+    return users_get(request)
 
 
 # GET ================================================================
@@ -159,12 +152,16 @@ def users_get(request):
         return users_get_insert_deptadmin(request)
 
     if request.user.is_superuser:
-        t_dict = init_render_dict(request)
-        return render(request, "users.html", t_dict)
+        d = {
+            "students": make_table_students(Student.objects.all()),
+            "teachers": make_table_teachers(Teacher.objects.all()),
+            "deptadmins": make_table_deptadmins(Deptadmin.objects.all())
+        }
+        return render(request, "users.html", d)
     elif request.user.is_deptadmin:
         pass
     else:
-        pass
+        raise PermissionDenied
 
 
 def users_get_insert_student(request):
@@ -405,6 +402,49 @@ def user_update(request, uid):
         pass
     else:
         pass
+
+
+# ====================================================================
+# /users/<int:id>/classes/signup : Signup students to classes
+# ====================================================================
+
+def classes_signup(request, uid):
+    if request.user.id != uid:
+        raise PermissionDenied
+
+    if request.method == "POST":
+        return classes_signup_post(request, uid)
+
+    student = Student.objects.get(user=request.user)
+
+    form = StudentClassSignupForm(student)
+
+    t_dict = {
+        "form": form,
+        "t": {
+            "title": "Class signup",
+            "sumbit_value": "Save"
+        }
+    }
+    return render(request, "base_form.html", t_dict)
+
+
+def classes_signup_post(request, uid):
+    student = Student.objects.get(user=request.user)
+
+    form = StudentClassSignupForm(student, request.POST)
+
+    if form.is_valid():
+        form.save()
+
+    t_dict = {
+        "form": form,
+        "t": {
+            "title": "Class signup",
+            "sumbit_value": "Save"
+        }
+    }
+    return render(request, "base_form.html", t_dict)
 
 
 # ====================================================================
