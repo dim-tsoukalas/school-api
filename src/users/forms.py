@@ -3,13 +3,19 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate
 from django.db import transaction
+from django.db.models import Max
 from django.utils.translation import gettext_lazy as _
+
+from classes.models import Classes, PrerequisiteClasses, Teaching, ClassSignup
 
 from .models import User, Student, Teacher, Deptadmin
 from mainpage.models import Department, DepartmentStudents, DepartmentTeachers
 from mainpage.forms import DepartmentChoiceField
 
 import datetime
+
+
+PASSING_MARK = 5
 
 
 # ====================================================================
@@ -213,6 +219,93 @@ class StudentUpdateForm(forms.Form):
         dept.dept_id = self.cleaned_data.get("department")
         dept.save()
         return user
+
+
+class StudentClassSignupForm(forms.Form):
+
+    def __init__(self, student_obj, *args, **kwargs):
+        super(StudentClassSignupForm, self).__init__(*args, **kwargs)
+        self.student_obj = student_obj
+
+        self.year = Teaching.objects.aggregate(Max("year"))["year__max"]
+        self.semester = Teaching.objects.filter(year=self.year).aggregate(
+            Max("semester"))["semester__max"]
+
+        # Classes for which the student has already signed up for.
+        initial = ClassSignup.objects.filter(
+            student=student_obj,
+            teaching__year=self.year,
+            teaching__semester=self.semester
+        ).values_list("teaching__class_id__id", flat=True)
+
+        self.initial["classes"] = list(initial)
+
+        self.fields["classes"] = forms.MultipleChoiceField(
+            label="",
+            required=False,
+            choices=self._get_available_signup_classes(),
+            widget=forms.CheckboxSelectMultiple()
+        )
+
+    def _get_available_signup_classes(self):
+        teachings = Teaching.objects.filter(
+            year=self.year, semester=self.semester
+        )
+        acc = []
+        for teaching in teachings:
+            # Skip passed class.
+            passed = ClassSignup.objects.filter(
+                student=self.student_obj, final_mark__gte=PASSING_MARK,
+                teaching=teaching
+            ).exists()
+            if passed:
+                continue
+
+            # Skip the class if there are prerequisite classes that the student
+            # has not passed.
+            if self._has_passed_prerequisite_classes(teaching.class_id):
+                class_obj = teaching.class_id
+                acc.append((class_obj.id, class_obj.name))
+
+        return acc
+
+    def _has_passed_prerequisite_classes(self, class_obj):
+        prerequisites = PrerequisiteClasses.objects.filter(
+            class_id=class_obj
+        )
+        for prerequisite in prerequisites:
+            teachings = Teaching.objects.filter(
+                class_id=prerequisite.prerequisite_id
+            )
+            passed = False
+            for teaching in teachings:
+                passed = ClassSignup.objects.filter(
+                    student=self.student_obj, final_mark__gte=PASSING_MARK,
+                    teaching=teaching
+                ).exists()
+                if passed:
+                    break
+            if not passed:
+                return False
+
+        return True
+
+    def save(self):
+        self._delete_old_signup()
+
+        for i in self.cleaned_data["classes"]:
+            class_obj = Classes.objects.get(id=i)
+            teaching = Teaching.objects.get(
+                class_id=class_obj, year=self.year, semester=self.semester)
+            ClassSignup.objects.create(
+                teaching=teaching, student=self.student_obj)
+
+    def _delete_old_signup(self):
+        ClassSignup.objects.filter(
+            student=self.student_obj,
+            teaching__year=self.year,
+            teaching__semester=self.semester
+        ).delete()
 
 
 # Teacher ============================================================
