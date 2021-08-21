@@ -1,9 +1,10 @@
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth import login, logout
 from django.shortcuts import render, redirect
-from django.db.models import Max
 
 from mainpage.models import DepartmentStudents, DepartmentTeachers
+
+from classes.models import ClassSignup
 
 from .models import User, Teacher, Student, Deptadmin
 from .forms import (
@@ -445,6 +446,26 @@ def classes_signup_post(request, uid):
         }
     }
     return render(request, "base_form.html", t_dict)
+
+
+# ====================================================================
+# /users/<int:id>/grades
+# ====================================================================
+
+def grades(request, uid):
+    if not request.user.is_authenticated or not request.user.is_student:
+        raise PermissionDenied
+
+    d = {"classes": {}}
+    signups = ClassSignup.objects.filter(
+        student__user=request.user
+    ).order_by("-teaching__year")
+    for i in signups:
+        acc = d["classes"].get(i.teaching.class_id.name, [])
+        acc.append(i)
+        d["classes"][i.teaching.class_id.name] = acc
+
+    return render(request, "student_grades.html", d)
 
 
 # ====================================================================
