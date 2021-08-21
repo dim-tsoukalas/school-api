@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}My Classes | University{% endblock %}
+
+
+{% block content %}
+
+<div id="modal">
+  <div id="modal-container">
+    <span id="modal-close">&times;</span>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<div class="basic-box-container">
+  <h2>Grades</h2>
+
+  <div class="entity-box-menu">
+    <a id="import-csv-a"
+       href="/departments/{{dept.id}}/classes/{{class.public_id}}
+/teaching/{{teaching.id}}/grades/upload">
+      Import (CSV)
+    </a>
+    <a id="export-grades-csv-a"
+       href="/departments/{{dept.id}}/classes/{{class.public_id}}
+/teaching/{{teaching.id}}/export/grades">
+      Export Grades (CSV)
+    </a>
+    <a id="export-signups-csv-a"
+       href="/departments/{{dept.id}}/classes/{{class.public_id}}
+/teaching/{{teaching.id}}/export/signups">
+      Export Signups (CSV)
+    </a>
+    <a id="apply-old-grades-a"
+       href="/departments/{{dept.id}}/classes/{{class.public_id}}
+/teaching/{{teaching.id}}/grades/apply_previous">
+      Apply Previous
+    </a>
+    <a id="finalize-grades-a"
+       href="/departments/{{dept.id}}/classes/{{class.public_id}}
+/teaching/{{teaching.id}}/grades/finalize">
+      Finalize
+    </a>
+  </div>
+
+  <table>
+    <thead>
+      <th>Registry Id</th>
+      <th>First name</th>
+      <th>Last name</th>
+      <th>Theory (current)</th>
+      <th>Lab (current)</th>
+      <th>Theory (previous)</th>
+      <th>Lab (previous)</th>
+      <th>Final</th>
+    </thead>
+    <tbody>
+      {% for i in signups %}
+      <tr>
+        <td>{{ i.registry_id }}</td>
+        <td>{{ i.first_name }}</td>
+        <td>{{ i.last_name }}</td>
+        <td>{{ i.theory_grade }}</td>
+        <td>{{ i.lab_grade }}</td>
+        <td>{{ i.theory_prev_grade }} ({{i.theory_prev_year}})</td>
+        <td>{{ i.lab_prev_grade }} ({{i.lab_prev_year}})</td>
+        <td>{{ i.final_mark }}</td>
+        <td>
+          <a class="grade-update-a"
+             href="/departments/{{dept.id}}/classes/{{class.public_id}}
+/teaching/{{teaching.id}}/grades/{{i.id}}/update">
+            Edit
+          </a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+</div>
+
+{% endblock %}
