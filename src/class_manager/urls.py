@@ -32,6 +32,7 @@ urlpatterns = [
     path("users/<int:uid>", users.views.user),
     path("users/<int:uid>/update", users.views.user_update),
     path("users/<int:uid>/classes/signup", users.views.classes_signup),
+    path("users/<int:uid>/grades", users.views.grades),
     # Superuser
     path("superuser", staff.views.superuser, name="superuser"),
     path("superuser/departments", staff.views.superuser_departments,
