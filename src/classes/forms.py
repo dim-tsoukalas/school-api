@@ -1,4 +1,6 @@
-from decimal import Decimal
+import csv
+import io
+from decimal import Decimal, InvalidOperation
 
 from django import forms
 from django.core.exceptions import ValidationError
@@ -6,10 +8,10 @@ from django.utils.translation import gettext_lazy as _
 
 from mainpage.models import DepartmentTeachers
 
-from users.models import Teacher
+from users.models import Teacher, Student
 from users.forms import TeacherChoiceField
 
-from .models import Classes, PrerequisiteClasses, Teaching
+from .models import Classes, PrerequisiteClasses, Teaching, ClassSignup
 
 
 # ====================================================================
@@ -177,3 +179,119 @@ class TeachingInsertForm(forms.ModelForm):
                 )
 
         return cleaned_data
+
+
+# ====================================================================
+# Grades
+# ====================================================================
+
+def apply_grade(signup, theory, lab):
+    signup.theory_mark = theory
+    signup.lab_mark = lab
+    if theory >= 5 and lab >= 5:
+        signup.final_mark = (
+            (signup.lab_mark * signup.teaching.lab_weight)
+            + (signup.theory_mark * signup.teaching.theory_weight)
+        )
+    elif theory < lab:
+        signup.final_mark = theory
+    else:
+        signup.final_mark = lab
+    signup.save()
+
+
+class GradeUpdateForm(forms.ModelForm):
+    class Meta:
+        model = ClassSignup
+        fields = ["theory_mark", "lab_mark"]
+
+    def save(self):
+        signup = super().save(commit=False)
+        apply_grade(signup, signup.theory_mark, signup.lab_mark)
+
+
+class GradesCSVFileForm(forms.Form):
+    def __init__(self, teaching, *args, **kwargs):
+        self.teaching = teaching
+        super(GradesCSVFileForm, self).__init__(*args, **kwargs)
+
+        self.fields["file"] = forms.FileField(
+            validators=[self._filesize, self._content_type,
+                        self._data_validate]
+        )
+
+    def _filesize(self, f):
+        if f.size > 2 * 1024 * 1024:  # 2 MiB filesize limit
+            raise ValidationError(_("File too large. Size limit: 2 MiB"))
+
+    def _content_type(self, f):
+        if f.content_type != "text/csv":
+            raise ValidationError(_("Please upload a CSV (text/csv) file."))
+
+    def _data_validate(self, f):
+        rows = csv.reader(
+            io.StringIO(f.read().decode("utf-8"), newline=None)
+        )
+        rid_errors = []
+        mark_errors = []
+        row_errors = []
+        next(rows)  # skip header
+        for count, row in enumerate(rows):
+            try:
+                registry_id, theory_g, lab_g = row
+            except ValueError:
+                # Make it 1-indexed and include the skipped header.
+                row_errors.append(str(count + 2))
+                continue
+
+            try:
+                Decimal(theory_g)
+                Decimal(lab_g)
+            except InvalidOperation:
+                mark_errors.append(registry_id)
+
+            try:
+                student = Student.objects.get(registry_id=registry_id)
+            except Student.DoesNotExist:
+                rid_errors.append(registry_id)
+                continue
+
+            exists = ClassSignup.objects.filter(
+                    student=student, teaching=self.teaching
+            ).exists()
+            if not exists:
+                rid_errors.append(registry_id)
+
+        errors = []
+        if rid_errors:
+            errors.append(ValidationError(
+                _("The following Ids do not exist or have not signed up for"
+                  " this class: %(err)s"),
+                params={"err": ", ".join(rid_errors)}))
+        if mark_errors:
+            errors.append(ValidationError(
+                _("The grades for the following Ids are not valid decimals:"
+                  " %(err)s"),
+                params={"err": ", ".join(mark_errors)}))
+        if row_errors:
+            errors.append(ValidationError(
+                _("The follwing rows are malformed: %(err)s"),
+                params={"err": ", ".join(row_errors)}))
+
+        if errors:
+            raise ValidationError(errors)
+
+    def handle(self, f):
+        # Reset the cursor. Needed because _data_validate also reads the file.
+        f.seek(0)
+        rows = csv.reader(
+            io.StringIO(f.read().decode("utf-8"), newline=None)
+        )
+        next(rows)  # skip header
+        for row in rows:
+            registry_id, theory_g, lab_g = row
+            student = Student.objects.get(registry_id=registry_id)
+            signup = ClassSignup.objects.get(
+                student=student, teaching=self.teaching
+            )
+            apply_grade(signup, Decimal(theory_g), Decimal(lab_g))
