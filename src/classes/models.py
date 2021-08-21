@@ -55,3 +55,34 @@ class ClassSignup(models.Model):
         max_digits=5, decimal_places=2, null=True)
     lab_mark = models.DecimalField(max_digits=5, decimal_places=2, null=True)
     final_mark = models.DecimalField(max_digits=5, decimal_places=2, null=True)
+    locked = models.BooleanField(default=False)
+
+    def get_previous_theory_grade(signup):
+        year = signup.teaching.year
+        teachings = Teaching.objects.filter(class_id=signup.teaching.class_id)
+        signups = ClassSignup.objects.exclude(
+            teaching__year=year
+        ).filter(
+            student=signup.student, teaching__in=teachings
+        ).order_by("-teaching__year")
+
+        for i in signups:
+            if i.theory_mark and i.teaching.year >= year:
+                return i.teaching.year, i.theory_mark
+
+        return None, None
+
+    def get_previous_lab_grade(signup):
+        year = signup.teaching.year
+        teachings = Teaching.objects.filter(class_id=signup.teaching.class_id)
+        signups = ClassSignup.objects.exclude(
+            teaching__year=year
+        ).filter(
+            student=signup.student, teaching__in=teachings
+        ).order_by("-teaching__year")
+
+        for i in signups:
+            if i.lab_mark and i.teaching.year >= year:
+                return i.teaching.year, i.lab_mark
+
+        return None, None
