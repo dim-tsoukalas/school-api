@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Grades | University{% endblock %}
+
+
+{% block content %}
+
+<div id="modal">
+  <div id="modal-container">
+    <span id="modal-close">&times;</span>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+
+<div class="basic-box-container">
+  <h2>Grades</h2>
+
+  {% for name, signups in classes.items %}
+
+  <h3>{{ name }}</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Year</th>
+        <th>Theory</th>
+        <th>Lab</th>
+        <th>Final</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for signup in signups %}
+      <tr>
+        <td>{{ signup.teaching.year }}</td>
+        <td>{{ signup.theory_mark }}</td>
+        <td>{{ signup.lab_mark }}</td>
+        <td>{{ signup.final_mark }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% endfor %}
+</div>
+
+{% endblock %}
