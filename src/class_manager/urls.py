@@ -71,5 +71,26 @@ urlpatterns = [
     path(("departments/<int:dept_id>/classes/<str:class_public_id>"
           "/teaching/<int:teaching_id>/delete"),
          classes.views.teaching_delete),
+    path(("departments/<int:dept_id>/classes/<str:class_public_id>"
+          "/teaching/<int:teaching_id>/grades"),
+         classes.views.grades, name="grades"),
+    path(("departments/<int:dept_id>/classes/<str:class_public_id>"
+          "/teaching/<int:teaching_id>/grades/upload"),
+         classes.views.grades_upload),
+    path(("departments/<int:dept_id>/classes/<str:class_public_id>"
+          "/teaching/<int:teaching_id>/grades/apply_previous"),
+         classes.views.grades_apply_previous),
+    path(("departments/<int:dept_id>/classes/<str:class_public_id>"
+          "/teaching/<int:teaching_id>/grades/finalize"),
+         classes.views.grades_finalize),
+    path(("departments/<int:dept_id>/classes/<str:class_public_id>"
+          "/teaching/<int:teaching_id>/export/grades"),
+         classes.views.export_grades),
+    path(("departments/<int:dept_id>/classes/<str:class_public_id>"
+          "/teaching/<int:teaching_id>/export/signups"),
+         classes.views.export_signups),
+    path(("departments/<int:dept_id>/classes/<str:class_public_id>"
+          "/teaching/<int:teaching_id>/grades/<int:grade_id>/update"),
+         classes.views.grade_update),
     path("users/<int:user_id>/classes", classes.views.user_classes)
 ]
