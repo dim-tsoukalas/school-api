@@ -1,6 +1,8 @@
+import csv
+
 from django.shortcuts import render, redirect
 from django.core.exceptions import PermissionDenied
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.db.models import Max
 
 from mainpage.views import init_render_dict
@@ -11,7 +13,7 @@ from users.models import Deptadmin, Teacher
 from .models import Classes, PrerequisiteClasses, Teaching, ClassSignup
 from .forms import (
     ClassInsertForm, ClassDescriptionForm, PrerequisiteClassForm,
-    TeachingInsertForm
+    TeachingInsertForm, GradeUpdateForm, GradesCSVFileForm
 )
 
 
@@ -535,6 +537,182 @@ def teaching_delete_post(request, dept_id, class_public_id, teaching_id):
 
     Teaching.objects.filter(id=teaching_id).delete()
     return redirect("class", dept_id, class_public_id)
+
+
+# ====================================================================
+# /departments/<int:dept_id>/classes/<int:class_public_id>
+# /teaching/<int:teaching_id>/grades
+# ====================================================================
+
+def grades(request, dept_id, class_public_id, teaching_id):
+    teaching = Teaching.objects.get(id=teaching_id)
+    signups = ClassSignup.objects.filter(teaching=teaching)
+    d = {
+        "dept": {"id": dept_id},
+        "class": {"public_id": class_public_id},
+        "teaching": {"id": teaching_id},
+        "signups": []
+    }
+    for signup in signups:
+        t_pr_year, t_pr_grade = ClassSignup.get_previous_theory_grade(signup)
+        l_pr_year, l_pr_grade = ClassSignup.get_previous_lab_grade(signup)
+        d["signups"].append({
+            "id": signup.id,
+            "registry_id": signup.student.registry_id,
+            "first_name": signup.student.first_name,
+            "last_name": signup.student.last_name,
+            "theory_grade": signup.theory_mark,
+            "lab_grade": signup.lab_mark,
+            "final_mark": signup.final_mark,
+            "theory_prev_grade": t_pr_grade,
+            "theory_prev_year": t_pr_year,
+            "lab_prev_grade": l_pr_grade,
+            "lab_prev_year": l_pr_year
+        })
+    return render(request, "classes_grades.html", d)
+
+
+# ====================================================================
+# /departments/<int:dept_id>/classes/<int:class_public_id>
+# /teaching/<int:teaching_id>/grades/upload
+# ====================================================================
+
+def grades_upload(request, dept_id, class_public_id, teaching_id):
+    teaching = Teaching.objects.get(id=teaching_id)
+    if request.method == "POST":
+        form = GradesCSVFileForm(teaching, request.POST, request.FILES)
+        if form.is_valid():
+            form.handle(request.FILES["file"])
+            return redirect("grades", dept_id, class_public_id, teaching_id)
+    else:
+        form = GradesCSVFileForm(teaching)
+
+    return render(request, "classes_csv_upload.html", {"form": form})
+
+
+# ====================================================================
+# /departments/<int:dept_id>/classes/<int:class_public_id>
+# /teaching/<int:teaching_id>/grades/apply_previous
+# ====================================================================
+
+def grades_apply_previous(request, dept_id, class_public_id, teaching_id):
+    signups = ClassSignup.objects.filter(teaching__id=teaching_id)
+    for signup in signups:
+        t_pr_year, t_pr_grade = ClassSignup.get_previous_theory_grade(signup)
+        l_pr_year, l_pr_grade = ClassSignup.get_previous_lab_grade(signup)
+        if t_pr_grade and l_pr_grade:
+            classes.forms.apply_grade(signup, t_pr_grade, l_pr_grade)
+    return redirect("grades", dept_id, class_public_id, teaching_id)
+
+
+# ====================================================================
+# /departments/<int:dept_id>/classes/<int:class_public_id>
+# /teaching/<int:teaching_id>/grades/finalize
+# ====================================================================
+
+def grades_finalize(request, dept_id, class_public_id, teaching_id):
+    signups = ClassSignup.objects.filter(
+        teaching__id=teaching_id, locked=False
+    )
+    errors = []
+    for signup in signups:
+        if not signup.theory_mark or not signup.lab_mark \
+           or not signup.final_mark:
+            errors.append(signup.student.registry_id)
+        else:
+            signup.locked = True
+            signup.save()
+
+    if errors:
+        return render(request, "info_dialog.html", {
+            "title": "Finalization errors",
+            "message": ("The grades for the following users could not be"
+                        " finalized. Please review them and retry."
+                        f'{", ".join(errors)}'),
+            "url": (f"/departments/{dept_id}"
+                    f"/classes/{class_public_id}"
+                    f"/teaching/{teaching_id}"
+                    "/grades")
+        })
+
+    return redirect("grades", dept_id, class_public_id, teaching_id)
+
+
+# ====================================================================
+# /departments/<int:dept_id>/classes/<int:class_public_id>
+# /teaching/<int:teaching_id>/export/grades
+# ====================================================================
+
+def export_grades(request, dept_id, class_public_id, teaching_id):
+    response = HttpResponse(
+        content_type="text/csv",
+        headers={"Content-Disposition": 'attachment; filename="grades.csv"'}
+    )
+    writer = csv.writer(response)
+
+    signups = ClassSignup.objects.filter(teaching__id=teaching_id)
+    for i in signups:
+        writer.writerow([
+            i.student.registry_id, i.student.first_name, i.student.last_name,
+            i.theory_mark, i.lab_mark, i.final_mark
+        ])
+
+    return response
+
+
+# ====================================================================
+# /departments/<int:dept_id>/classes/<int:class_public_id>
+# /teaching/<int:teaching_id>/export/signups
+# ====================================================================
+
+def export_signups(request, dept_id, class_public_id, teaching_id):
+    response = HttpResponse(
+        content_type="text/csv",
+        headers={"Content-Disposition": 'attachment; filename="signups.csv"'}
+    )
+    writer = csv.writer(response)
+
+    signups = ClassSignup.objects.filter(teaching__id=teaching_id)
+    for i in signups:
+        writer.writerow([
+            i.student.registry_id, i.student.first_name, i.student.last_name,
+            i.student.user.email
+        ])
+
+    return response
+
+
+# ====================================================================
+# /departments/<int:dept_id>/classes/<int:class_public_id>
+# /teaching/<int:teaching_id>/grades/<int:grade_id>/update
+# ====================================================================
+
+def grade_update(request, dept_id, class_public_id, teaching_id, grade_id):
+    if request.method == "POST":
+        return grade_update_post(
+            request, dept_id, class_public_id, teaching_id, grade_id
+        )
+
+    return grade_update_get(
+        request, dept_id, class_public_id, teaching_id, grade_id)
+
+
+def grade_update_get(request, dept_id, class_public_id, teaching_id, grade_id):
+    form = GradeUpdateForm(instance=ClassSignup.objects.get(id=grade_id))
+    return render_base_form(
+        request, {}, form, title="Update mark", submit_val="Save")
+
+
+def grade_update_post(request, dept_id, class_public_id, teaching_id,
+                      grade_id):
+    form = GradeUpdateForm(request.POST,
+                           instance=ClassSignup.objects.get(id=grade_id))
+    if form.is_valid():
+        form.save()
+        return redirect("grades", dept_id, class_public_id, teaching_id)
+    else:
+        return render_base_form(
+            request, {}, form, title="Update mark", submit_val="Save")
 
 
 # ====================================================================
