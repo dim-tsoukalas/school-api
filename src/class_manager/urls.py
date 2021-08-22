@@ -20,9 +20,11 @@ import mainpage.views
 import staff.views
 import classes.views
 import stats.views
+import search.views
 
 urlpatterns = [
     path("", mainpage.views.home, name="home"),
+    path("search", search.views.search),
     path("signin", users.views.signin, name="signin"),
     path("signout", users.views.signout, name="signout"),
     path("signup", users.views.signup, name="signup"),
