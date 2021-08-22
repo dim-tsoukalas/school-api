@@ -12,8 +12,8 @@
         <a class="logo" href="/"></a>
         {% block logo_menu_content %}{% endblock %}
         <div class="searchbar">
-          <form action="/search">
-            <input type="text" placeholder="Search..." name="search">
+          <form action="/search" method="GET">
+            <input type="text" placeholder="Search..." name="q">
             <input type="submit" value="&#x279C;">
           </form>
         </div>
