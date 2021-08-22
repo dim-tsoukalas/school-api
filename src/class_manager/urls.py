@@ -19,6 +19,7 @@ import users.views
 import mainpage.views
 import staff.views
 import classes.views
+import stats.views
 
 urlpatterns = [
     path("", mainpage.views.home, name="home"),
@@ -33,6 +34,8 @@ urlpatterns = [
     path("users/<int:uid>/update", users.views.user_update),
     path("users/<int:uid>/classes/signup", users.views.classes_signup),
     path("users/<int:uid>/grades", users.views.grades),
+    # Stats
+    path("users/<int:uid>/stats", stats.views.stats),
     # Superuser
     path("superuser", staff.views.superuser, name="superuser"),
     path("superuser/departments", staff.views.superuser_departments,
