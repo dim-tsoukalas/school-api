@@ -5,30 +5,19 @@
 
 {% block content %}
 
-<div id="modal">
-  <div id="modal-container">
-    <span id="modal-close">&times;</span>
-    <div id="modal-content"></div>
-  </div>
-</div>
-
-
-<div class="basic-box-container">
+<div class="main-container">
   <h2>Grades</h2>
-</div>
 
-<div class="basic-box-container">
-  <h3>Total passed</h3>
-  <p>{{text_students.passed}}/{{text_students.total}}</p>
-</div>
+  <p><b>Total passed:</b> {{text_students.passed}}/{{text_students.total}}</p>
 
-<div class="basic-box-container">
-  <h3>Classes assigned per year</h3>
+  <br>
+
+  <h4>Classes assigned per year</h4>
   <img src="data:image/svg+xml;base64, {{bar_classes}}" alt="graph"></img>
-</div>
 
-<div id="st-pass-yr" class="basic-box-container">
-  <h3>Students passed per class</h3>
+  <br><br>
+
+  <h4>Students passed per class</h4>
   <div id="years-menu">
     {% for year in pies_students_years %}
     <a href="/users/{{user.id}}/stats?students_graphs_year={{year}}#st-pass-yr">{{ year }}</a>

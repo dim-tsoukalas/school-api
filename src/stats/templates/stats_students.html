@@ -5,23 +5,16 @@
 
 {% block content %}
 
-<div id="modal">
-  <div id="modal-container">
-    <span id="modal-close">&times;</span>
-    <div id="modal-content"></div>
-  </div>
-</div>
-
-
-<div class="basic-box-container">
+<div class="main-container">
   <h2>Grades</h2>
 
-  <h3>Total passed</h3>
-  <p>{{total_passed}}/{{total}}</p>
+  <p><b>Total passed:</b> {{total_passed}}/{{total}}</p>
 
   {% for group, chart in pie.items %}
 
-  <h3>{{ group }}</h3>
+  <br>
+
+  <h4>{{ group }}</h4>
 
   <img src="data:image/svg+xml;base64, {{chart}}" alt="graph"></img>
 
