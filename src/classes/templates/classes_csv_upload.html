@@ -6,26 +6,31 @@
 
 {% block content %}
 
-<form id="base-form" method="post" action="" enctype="multipart/form-data">
-  {% csrf_token %}
-  {{ form.non_field_errors }}
-  <table>
-    <tbody>
-      {% for field in form %}
-      <tr>
-        <td>{{ field.label_tag }}</td>
-        <td>{{ field }}</td>
-        {% for error in field.errors %}<td>
-        <td style="color: red">{{ error }}</td>
-        {% endfor %}
-      </tr>
+<div class="main-container">
+  <h2>Upload CSV file</h2>
 
-      {% endfor %}
-    </tbody>
-  </table>
+  <div class="form-container">
+    <form id="base-form" method="post" action="" enctype="multipart/form-data">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+      <table>
+        <tbody>
+          {% for field in form %}
+          <tr>
+            <td>{{ field.label_tag }}</td>
+            <td>{{ field }}</td>
+            {% for error in field.errors %}<td>
+            <td style="color: red">{{ error }}</td>
+            {% endfor %}
+          </tr>
 
-  <input type="submit" value="Upload">
+          {% endfor %}
+        </tbody>
+      </table>
 
-</form>
+      <input type="submit" value="Upload">
 
+    </form>
+  </div>
+</div>
 {% endblock %}
