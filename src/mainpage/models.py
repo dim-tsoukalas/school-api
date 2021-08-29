@@ -5,15 +5,12 @@ from django.utils.translation import gettext_lazy as _
 # Choices
 
 class States(models.TextChoices):
-    # In the SETUP state admins can add or delete classes, insert new teachings
-    # and assign Teacher. Teachers can also add weights and limits for their
-    # classes.
+    # In the SETUP state students are not allowed to signup to new teachings.
     SETUP = "setup", _("Classes setup")
-    # In the SINGUP state classes and teachings are finalized and students can
-    # signup to the classes they are eligible for.
+    # In the SINGUP state students may signups to a new teaching.
     SIGNUP = "signup", _("Class signups")
-    # In the MARK state class signups have been finalized and teachers must
-    # insert the marks.
+    # In the MARK state teachers must input the grades of all the signed up
+    # students.
     MARK = "mark", _("Class marks")
 
 
@@ -33,7 +30,7 @@ class Department(models.Model):
 
     state = models.CharField(
         max_length=6, choices=States.choices, default=States.SETUP)
-    year = models.CharField(max_length=4)
+    year = models.CharField(max_length=4, blank=True)
     semester = models.CharField(
         max_length=15, choices=Semesters.choices, default=Semesters.FIRST)
 
