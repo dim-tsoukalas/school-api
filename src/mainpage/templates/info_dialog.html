@@ -6,7 +6,13 @@
 
 {% block content %}
 
-<p>{{message}}</p>
-<a href="{{url}}">Ok</a>
+<div class="main-container">
+  <div id="confirm-form">
+    <p>{{message}}</p>
+    <div class="confirm-form-choices">
+      <a id="confirm-form-return" href="{{url}}">Ok</a>
+    </div>
+  </div>
+</div>
 
 {% endblock %}

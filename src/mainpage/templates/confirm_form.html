@@ -1,16 +1,23 @@
 {% extends "base.html" %}
 
 
-{% block title %}{{t.title}} | University{% endblock %}
+{% block title %}{{confirm_form.title}} | {{university.name}}{% endblock %}
 
 
 {% block content %}
+<div class="main-container">
+  <h2>{{confirm_form.title}}</h2>
 
-<form id="confirm-form" method="post" action="">
-  {% csrf_token %}
-  <p>{{t.confirm_text}}</p>
-  <a href="{{t.return_url}}">No</a>
-  <input type="submit" value="Yes">
-</form>
+  <div class="form-container">
+    <form id="confirm-form" method="post" action="">
+      {% csrf_token %}
+      <p>{{confirm_form.text}}</p>
+      <div class="confirm-form-choices">
+        <a id="confirm-form-return" href="{{confirm_form.return_url}}">No</a>
+        <input type="submit" value="Yes">
+      </div>
+    </form>
+  </div>
 
+</div>
 {% endblock %}

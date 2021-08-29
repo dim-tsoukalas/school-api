@@ -1,31 +1,44 @@
 {% extends "base.html" %}
 
 
-{% block title %}{{t.title}} | University{% endblock %}
+{% block title %}{{base_form.title}} | {{university.name}}{% endblock %}
 
 
 {% block content %}
 
-<form id="base-form" method="post" action="">
-  {% csrf_token %}
-  {{ form.non_field_errors }}
-  <table>
-    <tbody>
-      {% for field in form %}
-      <tr>
-        <td>{{ field.label_tag }}</td>
-        <td>{{ field }}</td>
-        {% for error in field.errors %}<td>
-        <td style="color: red">{{ error }}</td>
-        {% endfor %}
-      </tr>
+<div class="main-container">
+  <h2>{{base_form.title}}</h2>
 
-      {% endfor %}
-    </tbody>
-  </table>
+  <div class="form-container">
+    <form id="base-form" method="post" action="">
+      {% csrf_token %}
+      {{ base_form.form.non_field_errors }}
+      <table>
+        <tbody>
+          {% for field in base_form.form %}
+          <tr>
+            {% if field.label_tag %}
+            <td class="label">{{ field.label_tag }}</td>
+            {% endif %}
 
-  <input type="submit" value="{{t.sumbit_value}}">
+            <td>{{ field }}</td>
 
-</form>
+            {% if not field.errors and field.help_text %}
+            <td class="help">{{field.help_text}}</td>
+            {% endif %}
 
+            {% for error in field.errors %}<td>
+            <td style="color: red">{{ error }}</td>
+            {% endfor %}
+          </tr>
+
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <input type="submit" value="{{base_form.submit_value}}">
+
+    </form>
+  </div>
+</div>
 {% endblock %}
