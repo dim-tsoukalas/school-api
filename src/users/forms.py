@@ -161,8 +161,7 @@ class StudentSignupForm(UserCreationForm):
         return user
 
 
-class StudentUpdateForm(forms.Form):
-    user_id = forms.IntegerField(required=True)
+class StudentUpdateForm(forms.ModelForm):
     department = DepartmentChoiceField(
         queryset=Department.objects.all(),
         required=True
@@ -173,9 +172,6 @@ class StudentUpdateForm(forms.Form):
     admission_year = forms.IntegerField(
         min_value=2000, max_value=datetime.datetime.now().year, required=True
     )
-    email = forms.EmailField(
-        max_length=254, help_text="Required. Enter a valid email address."
-    )
 
     error_messages = {
         "email_exists": _("This email is used by another user."),
@@ -183,9 +179,14 @@ class StudentUpdateForm(forms.Form):
                                 " exists."),
     }
 
+    class Meta:
+        model = User
+        fields = ["department", "first_name", "last_name", "registry_id",
+                  "admission_year", "email"]
+
     def clean(self):
         cleaned_data = super().clean()
-
+        """
         email = cleaned_data.get("email")
         exists = User.objects.filter(email=email)
         if exists and not exists[0].id == cleaned_data.get("user_id"):
@@ -193,10 +194,10 @@ class StudentUpdateForm(forms.Form):
                 self.error_messages["email_exists"],
                 code="email_exists"
             )
-
+        """
         reg_id = cleaned_data.get("registry_id")
         exists = Student.objects.filter(registry_id=reg_id)
-        if exists and not exists[0].user.id == cleaned_data.get("user_id"):
+        if exists and not exists[0].user.email == cleaned_data.get("email"):
             raise ValidationError(
                 self.error_messages["registry_id_exists"],
                 code="registry_id_exists"
@@ -206,8 +207,7 @@ class StudentUpdateForm(forms.Form):
 
     @transaction.atomic
     def save(self):
-        user = User.objects.get(id=self.cleaned_data.get("user_id"))
-        user.email = self.cleaned_data.get("email")
+        user = super().save(commit=False)
         user.save()
         student = Student.objects.get(user=user)
         student.first_name = self.cleaned_data.get("first_name")
@@ -346,8 +346,7 @@ class TeacherSignupForm(UserCreationForm):
         return user
 
 
-class TeacherUpdateForm(forms.Form):
-    user_id = forms.IntegerField(required=True)
+class TeacherUpdateForm(forms.ModelForm):
     department = DepartmentChoiceField(
         queryset=Department.objects.all(),
         required=True
@@ -357,31 +356,18 @@ class TeacherUpdateForm(forms.Form):
     rank = forms.ChoiceField(
         choices=Teacher.TeacherRanks.choices, required=True
     )
-    email = forms.EmailField(
-        max_length=254, help_text="Required. Enter a valid email address."
-    )
 
     error_messages = {
         "email_exists": _("This email is used by another user.")
     }
 
-    def clean(self):
-        cleaned_data = super().clean()
-
-        email = cleaned_data.get("email")
-        exists = User.objects.filter(email=email)
-        if exists and not exists[0].id == cleaned_data.get("user_id"):
-            raise ValidationError(
-                self.error_messages["email_exists"],
-                code="email_exists"
-            )
-
-        return cleaned_data
+    class Meta:
+        model = User
+        fields = ["department", "first_name", "last_name", "rank", "email"]
 
     @transaction.atomic
     def save(self):
-        user = User.objects.get(id=self.cleaned_data.get("user_id"))
-        user.email = self.cleaned_data.get("email")
+        user = super().save(commit=False)
         user.save()
         teacher = Teacher.objects.get(user=user)
         teacher.first_name = self.cleaned_data.get("first_name")
@@ -422,37 +408,23 @@ class DeptadminSignupForm(UserCreationForm):
         return user
 
 
-class DeptadminUpdateForm(forms.Form):
-    user_id = forms.IntegerField(required=True)
+class DeptadminUpdateForm(forms.ModelForm):
     department = DepartmentChoiceField(
         queryset=Department.objects.all(),
         required=True
-    )
-    email = forms.EmailField(
-        max_length=254, help_text="Required. Enter a valid email address."
     )
 
     error_messages = {
         "email_exists": _("This email is used by another user.")
     }
 
-    def clean(self):
-        cleaned_data = super().clean()
-
-        email = cleaned_data.get("email")
-        exists = User.objects.filter(email=email)
-        if exists and not exists[0].id == cleaned_data.get("user_id"):
-            raise ValidationError(
-                self.error_messages["email_exists"],
-                code="email_exists"
-            )
-
-        return cleaned_data
+    class Meta:
+        model = User
+        fields = ["department", "email"]
 
     @transaction.atomic
     def save(self):
-        user = User.objects.get(id=self.cleaned_data.get("user_id"))
-        user.email = self.cleaned_data.get("email")
+        user = super().save(commit=False)
         user.save()
         deptadmin = Deptadmin.objects.get(user=user)
         deptadmin.department = self.cleaned_data.get("department")
