@@ -5,15 +5,15 @@ from django.core.exceptions import PermissionDenied
 from django.http import Http404, HttpResponse
 from django.db.models import Max
 
-from mainpage.views import init_render_dict
+from mainpage.views import init_render_dict, render_dict_add_perm
 from mainpage.models import Department
 
-from users.models import Deptadmin, Teacher
+from users.models import Teacher
 
 from .models import Classes, PrerequisiteClasses, Teaching, ClassSignup
 from .forms import (
     ClassInsertForm, ClassDescriptionForm, PrerequisiteClassForm,
-    TeachingInsertForm, GradeUpdateForm, GradesCSVFileForm
+    TeachingInsertForm, GradeUpdateForm, GradeUnlockForm, GradesCSVFileForm
 )
 
 
@@ -28,40 +28,6 @@ def render_dict_add_dept(t_dict, dept_id):
             "object": obj,
             "name": obj.name,
             "id": dept_id
-        }
-    })
-
-    return t_dict
-
-
-def render_dict_add_perm(t_dict, request, dept_id, class_public_id=False):
-    user = request.user
-
-    is_admin = False
-    is_teacher = False
-
-    if user.is_authenticated:
-        if user.is_superuser:
-            is_admin = True
-        elif user.is_deptadmin:
-            if Deptadmin.objects.get(user=user).department.id == dept_id:
-                is_admin = True
-        elif class_public_id and user.is_teacher:
-            try:
-                year = Teaching.objects.aggregate(Max("year"))["year__max"]
-                class_obj = Classes.objects.get(public_id=class_public_id)
-                teacher = Teacher.objects.get(user=user)
-                Teaching.objects.get(
-                    class_id=class_obj, teacher=teacher, year=year)
-                is_teacher = True
-            except (Classes.DoesNotExist, Teacher.DoesNotExist,
-                    Teaching.DoesNotExist):
-                pass
-
-    t_dict.update({
-        "perm": {
-            "is_admin": is_admin,
-            "is_teacher": is_teacher
         }
     })
 
@@ -97,15 +63,13 @@ def render_dict_add_class(t_dict, class_public_id):
 
 # Form rendering =====================================================
 
-def render_base_form(request, t_dict, form, title="Insert", submit_val="Save"):
-    t_dict.update({
+def render_base_form(request, d, form, title="Insert", submit_val="Save"):
+    d["base_form"] = {
         "form": form,
-        "t": {
-            "title": title,
-            "sumbit_value": submit_val
-        }
-    })
-    return render(request, "base_form.html", t_dict)
+        "title": title,
+        "submit_value": submit_val
+    }
+    return render(request, "base_form.html", d)
 
 
 # ====================================================================
@@ -147,21 +111,15 @@ def insert(request, dept_id):
     return insert_get(request, d)
 
 
-def insert_get(request, t_dict, form=False):
-    dept_obj = t_dict["dept"]["object"]
+def insert_get(request, d, form=False):
+    d.update(init_render_dict(request))
+    dept_obj = d["dept"]["object"]
     form = form if form else ClassInsertForm(
         dept_obj,
         instance=Classes(department=dept_obj)
     )
-    t_dict.update({
-        "form": form,
-        "t": {
-            "title": "Insert class",
-            "sumbit_value": "Insert"
-        }
-    })
-
-    return render(request, "base_form.html", t_dict)
+    return render_base_form(
+        request, d, form, title="Insert class", submit_val="Insert")
 
 
 def insert_post(request, t_dict):
@@ -225,10 +183,9 @@ def delete_get(request, t_dict):
     dept_id = t_dict["dept"]["id"]
     class_name = t_dict["class"]["name"]
 
-    t_dict["t"] = {
+    t_dict["confirm_form"] = {
         "title": f"Delete {class_name}?",
-        "confirm_text": ("Are you sure that you want to delete the class"
-                         f" {class_name}?"),
+        "text": f"Delete the class {class_name}?",
         "return_url": f"/departments/{dept_id}/classes"
     }
     return render(request, "confirm_form.html", t_dict)
@@ -251,6 +208,7 @@ def info_update_get(request, dept_id, class_public_id):
     except Department.DoesNotExist:
         raise Http404(f"No department with id {dept_id}")
 
+    d.update(init_render_dict(request))
     d = render_dict_add_perm(d, request, dept_id, class_public_id)
     d = render_dict_add_class(d, class_public_id)
 
@@ -264,14 +222,8 @@ def info_update_get(request, dept_id, class_public_id):
     elif d["perm"]["is_teacher"]:
         form = ClassDescriptionForm(instance=class_obj)
 
-    d.update({
-        "form": form,
-        "t": {
-            "title": "Update class info",
-            "sumbit_value": "Update"
-        }
-    })
-    return render(request, "base_form.html", d)
+    return render_base_form(
+        request, d, form, title="Update class info", submit_val="Update")
 
 
 def info_update_post(request, dept_id, class_public_id):
@@ -303,14 +255,9 @@ def info_update_post(request, dept_id, class_public_id):
             class_public_id=new_public_id
         )
     else:
-        d.update({
-            "form": form,
-            "t": {
-                "title": "Update class info",
-                "sumbit_value": "Update"
-            }
-        })
-        return render(request, "base_form.html", d)
+        d.update(init_render_dict(request))
+        return render_base_form(
+            request, d, form, title="Update class info", submit_val="Update")
 
 
 # ====================================================================
@@ -325,7 +272,9 @@ def prerequisites_insert(request, dept_id, class_public_id):
 
 
 def prerequisites_insert_get(request, dept_id, class_public_id):
-    d = render_dict_add_perm({}, request, dept_id, class_public_id)
+    d = init_render_dict(request)
+    d = render_dict_add_dept(d, dept_id)
+    d = render_dict_add_perm(d, request, dept_id, class_public_id)
 
     if not (d["perm"]["is_admin"] or d["perm"]["is_teacher"]):
         raise PermissionDenied
@@ -374,15 +323,17 @@ def prerequisites_delete(request, dept_id, class_public_id, req_id):
 
 
 def prerequisites_delete_get(request, dept_id, class_public_id, req_id):
-    d = render_dict_add_perm({}, request, dept_id, class_public_id)
+    d = init_render_dict(request)
+    d = render_dict_add_dept(d, dept_id)
+    d = render_dict_add_perm(d, request, dept_id, class_public_id)
 
     if not (d["perm"]["is_admin"] or d["perm"]["is_teacher"]):
         raise PermissionDenied
 
-    d["t"] = {
+    d["confirm_form"] = {
         "title": "Delete teaching?",
-        "confirm_text": ("Are you sure that you want to delete this"
-                         " prerequisite class?"),
+        "text": ("Are you sure that you want to delete this"
+                 " prerequisite class?"),
         "return_url": f"/departments/{dept_id}/classes/{class_public_id}"
     }
     return render(request, "confirm_form.html", d)
@@ -410,7 +361,9 @@ def teaching_insert(request, dept_id, class_public_id):
 
 
 def teaching_insert_get(request, dept_id, class_public_id):
-    d = render_dict_add_perm({}, request, dept_id)
+    d = init_render_dict(request)
+    d = render_dict_add_dept(d, dept_id)
+    d = render_dict_add_perm(d, request, dept_id)
 
     if not d["perm"]["is_admin"]:
         raise PermissionDenied
@@ -457,7 +410,9 @@ def teaching_update(request, dept_id, class_public_id, teaching_id):
 
 
 def teaching_update_get(request, dept_id, class_public_id, teaching_id):
-    d = render_dict_add_perm({}, request, dept_id, class_public_id)
+    d = init_render_dict(request)
+    d = render_dict_add_dept(d, dept_id)
+    d = render_dict_add_perm(d, request, dept_id, class_public_id)
 
     if d["perm"]["is_admin"]:
         form_mode = "admin_update"
@@ -513,17 +468,19 @@ def teaching_delete(request, dept_id, class_public_id, teaching_id):
 
 
 def teaching_delete_get(request, dept_id, class_public_id, teaching_id):
-    d = render_dict_add_perm({}, request, dept_id)
+    d = init_render_dict(request)
+    d = render_dict_add_dept(d, dept_id)
+    d = render_dict_add_perm(d, request, dept_id)
 
     if not d["perm"]["is_admin"]:
         raise PermissionDenied
 
     teaching_obj = Teaching.objects.get(id=teaching_id)
 
-    d["t"] = {
+    d["confirm_form"] = {
         "title": "Delete teaching?",
-        "confirm_text": ("Are you sure that you want to delete the"
-                         f" {teaching_obj.year} teaching?"),
+        "text": ("Are you sure that you want to delete the"
+                 f" {teaching_obj.year} teaching?"),
         "return_url": f"/departments/{dept_id}/classes/{class_public_id}"
     }
     return render(request, "confirm_form.html", d)
@@ -545,14 +502,20 @@ def teaching_delete_post(request, dept_id, class_public_id, teaching_id):
 # ====================================================================
 
 def grades(request, dept_id, class_public_id, teaching_id):
+    d = init_render_dict(request)
+    d = render_dict_add_dept(d, dept_id)
+    d = render_dict_add_perm(d, request, dept_id, class_public_id)
+    d = render_dict_add_class(d, class_public_id)
+
+    if not (d["perm"]["is_admin"] or d["perm"]["is_teacher"]):
+        raise PermissionDenied
+
     teaching = Teaching.objects.get(id=teaching_id)
     signups = ClassSignup.objects.filter(teaching=teaching)
-    d = {
-        "dept": {"id": dept_id},
-        "class": {"public_id": class_public_id},
+    d.update({
         "teaching": {"id": teaching_id},
         "signups": []
-    }
+    })
     for signup in signups:
         t_pr_year, t_pr_grade = ClassSignup.get_previous_theory_grade(signup)
         l_pr_year, l_pr_grade = ClassSignup.get_previous_lab_grade(signup)
@@ -564,6 +527,7 @@ def grades(request, dept_id, class_public_id, teaching_id):
             "theory_grade": signup.theory_mark,
             "lab_grade": signup.lab_mark,
             "final_mark": signup.final_mark,
+            "locked": signup.locked,
             "theory_prev_grade": t_pr_grade,
             "theory_prev_year": t_pr_year,
             "lab_prev_grade": l_pr_grade,
@@ -578,6 +542,13 @@ def grades(request, dept_id, class_public_id, teaching_id):
 # ====================================================================
 
 def grades_upload(request, dept_id, class_public_id, teaching_id):
+    d = init_render_dict(request)
+    d = render_dict_add_dept(d, dept_id)
+    d = render_dict_add_perm(d, request, dept_id, class_public_id)
+
+    if not (d["perm"]["is_admin"] or d["perm"]["is_teacher"]):
+        raise PermissionDenied
+
     teaching = Teaching.objects.get(id=teaching_id)
     if request.method == "POST":
         form = GradesCSVFileForm(teaching, request.POST, request.FILES)
@@ -587,7 +558,8 @@ def grades_upload(request, dept_id, class_public_id, teaching_id):
     else:
         form = GradesCSVFileForm(teaching)
 
-    return render(request, "classes_csv_upload.html", {"form": form})
+    d.update({"form": form})
+    return render(request, "classes_csv_upload.html", d)
 
 
 # ====================================================================
@@ -596,8 +568,14 @@ def grades_upload(request, dept_id, class_public_id, teaching_id):
 # ====================================================================
 
 def grades_apply_previous(request, dept_id, class_public_id, teaching_id):
+    d = render_dict_add_perm({}, request, dept_id, class_public_id)
+    if not (d["perm"]["is_admin"] or d["perm"]["is_teacher"]):
+        raise PermissionDenied
+
     signups = ClassSignup.objects.filter(teaching__id=teaching_id)
     for signup in signups:
+        if signup.locked:
+            continue
         t_pr_year, t_pr_grade = ClassSignup.get_previous_theory_grade(signup)
         l_pr_year, l_pr_grade = ClassSignup.get_previous_lab_grade(signup)
         if t_pr_grade and l_pr_grade:
@@ -611,6 +589,11 @@ def grades_apply_previous(request, dept_id, class_public_id, teaching_id):
 # ====================================================================
 
 def grades_finalize(request, dept_id, class_public_id, teaching_id):
+    d = init_render_dict(request)
+    d = render_dict_add_perm(d, request, dept_id, class_public_id)
+    if not (d["perm"]["is_admin"] or d["perm"]["is_teacher"]):
+        raise PermissionDenied
+
     signups = ClassSignup.objects.filter(
         teaching__id=teaching_id, locked=False
     )
@@ -624,16 +607,17 @@ def grades_finalize(request, dept_id, class_public_id, teaching_id):
             signup.save()
 
     if errors:
-        return render(request, "info_dialog.html", {
+        d.update({
             "title": "Finalization errors",
             "message": ("The grades for the following users could not be"
                         " finalized. Please review them and retry."
-                        f'{", ".join(errors)}'),
+                        f' {", ".join(errors)}'),
             "url": (f"/departments/{dept_id}"
                     f"/classes/{class_public_id}"
                     f"/teaching/{teaching_id}"
                     "/grades")
         })
+        return render(request, "info_dialog.html", d)
 
     return redirect("grades", dept_id, class_public_id, teaching_id)
 
@@ -644,6 +628,10 @@ def grades_finalize(request, dept_id, class_public_id, teaching_id):
 # ====================================================================
 
 def export_grades(request, dept_id, class_public_id, teaching_id):
+    d = render_dict_add_perm({}, request, dept_id, class_public_id)
+    if not (d["perm"]["is_admin"] or d["perm"]["is_teacher"]):
+        raise PermissionDenied
+
     response = HttpResponse(
         content_type="text/csv",
         headers={"Content-Disposition": 'attachment; filename="grades.csv"'}
@@ -666,6 +654,10 @@ def export_grades(request, dept_id, class_public_id, teaching_id):
 # ====================================================================
 
 def export_signups(request, dept_id, class_public_id, teaching_id):
+    d = render_dict_add_perm({}, request, dept_id, class_public_id)
+    if not (d["perm"]["is_admin"] or d["perm"]["is_teacher"]):
+        raise PermissionDenied
+
     response = HttpResponse(
         content_type="text/csv",
         headers={"Content-Disposition": 'attachment; filename="signups.csv"'}
@@ -688,6 +680,10 @@ def export_signups(request, dept_id, class_public_id, teaching_id):
 # ====================================================================
 
 def grade_update(request, dept_id, class_public_id, teaching_id, grade_id):
+    d = render_dict_add_perm({}, request, dept_id, class_public_id)
+    if not (d["perm"]["is_admin"] or d["perm"]["is_teacher"]):
+        raise PermissionDenied
+
     if request.method == "POST":
         return grade_update_post(
             request, dept_id, class_public_id, teaching_id, grade_id
@@ -698,40 +694,91 @@ def grade_update(request, dept_id, class_public_id, teaching_id, grade_id):
 
 
 def grade_update_get(request, dept_id, class_public_id, teaching_id, grade_id):
-    form = GradeUpdateForm(instance=ClassSignup.objects.get(id=grade_id))
+    d = init_render_dict(request)
+    d = render_dict_add_dept(d, dept_id)
+    d = render_dict_add_perm(d, request, dept_id, class_public_id)
+
+    signup = ClassSignup.objects.get(id=grade_id)
+    if signup.locked:
+        d.update({
+            "title": "Finalization errors",
+            "message": ("The grades for this signup are locked."
+                        f' (student: {signup.student.registry_id})'),
+            "url": (f"/departments/{dept_id}/classes/{class_public_id}"
+                    f"/teaching/{teaching_id}/grades")
+        })
+        return render(request, "info_dialog.html", d)
+
+    form = GradeUpdateForm(instance=signup)
     return render_base_form(
-        request, {}, form, title="Update mark", submit_val="Save")
+        request, d, form, title="Update grade", submit_val="Save")
 
 
 def grade_update_post(request, dept_id, class_public_id, teaching_id,
                       grade_id):
+    signup = ClassSignup.objects.get(id=grade_id)
+    if signup.locked:
+        d = init_render_dict(request)
+        d.update({
+            "title": "Finalization errors",
+            "message": ("The grades for this signup are locked."
+                        f' (student: {signup.student.registry_id})'),
+            "url": (f"/departments/{dept_id}/classes/{class_public_id}"
+                    f"/teaching/{teaching_id}/grades")
+        })
+        return render(request, "info_dialog.html", d)
+
     form = GradeUpdateForm(request.POST,
-                           instance=ClassSignup.objects.get(id=grade_id))
+                           instance=signup)
     if form.is_valid():
         form.save()
         return redirect("grades", dept_id, class_public_id, teaching_id)
     else:
+        d = init_render_dict(request)
+        d = render_dict_add_dept(d, dept_id)
+        d = render_dict_add_perm(d, request, dept_id, class_public_id)
         return render_base_form(
-            request, {}, form, title="Update mark", submit_val="Save")
+            request, d, form, title="Update mark", submit_val="Save")
 
 
 # ====================================================================
-# /users/<int:user_id>/classes
+# /departments/<int:dept_id>/classes/<int:class_public_id>
+# /teaching/<int:teaching_id>/grades/<int:grade_id>/unlock
 # ====================================================================
 
-def user_classes(request, user_id):
+def grade_unlock(request, dept_id, class_public_id, teaching_id, grade_id):
+    d = render_dict_add_perm({}, request, dept_id, class_public_id)
+    if not (d["perm"]["is_admin"] or d["perm"]["is_teacher"]):
+        raise PermissionDenied
+
+    signup = ClassSignup.objects.get(id=grade_id)
+    form = GradeUnlockForm(request.POST, instance=signup)
+    if form.is_valid():
+        form.save()
+        return redirect("grades", dept_id, class_public_id, teaching_id)
+    else:
+        # The following should never be shown. If it is there is an error
+        # with the way the form is rendered or validated.
+        return render_base_form(
+            request, d, form, title="Unlock grade", submit_val="Save")
+
+
+# ====================================================================
+# /users/<int:user_id>/teachings
+# ====================================================================
+
+def my_teachings(request, user_id):
     d = init_render_dict(request)
 
-    if d["user"].get("is_teacher"):
-        return user_classes_teacher(request, d)
+    if not d["user"].get("is_teacher"):
+        return Http404()
 
-    return Http404()
+    dept_id = d["user"]["teacher"]["departments"][0].dept_id.id
+    d = render_dict_add_dept(d, dept_id)
 
-
-def user_classes_teacher(request, d):
     teacher = Teacher.objects.get(user=d["user"]["object"])
     year = Teaching.objects.aggregate(Max("year"))["year__max"]
     teachings = Teaching.objects.filter(
         teacher=teacher, year=year).select_related("class_id")
     d["teachings"] = teachings
-    return render(request, "classes_teacher.html", d)
+    return render(request, "classes_my_teachings.html", d)
