@@ -1,5 +1,4 @@
-<a href="/">Home</a>
 <a href="/departments">Departments</a>
-<a href="/users/{{user.id}}/classes">Teachings</a>
+<a href="/departments/{{user.teacher.departments.0.dept_id.id}}/classes">Classes</a>
+<a href="/users/{{user.id}}/teachings">Teachings</a>
 <a href="/users/{{user.id}}/stats">Stats</a>
-<a href="/signout">Sign out</a>
