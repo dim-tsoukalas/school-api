@@ -210,6 +210,17 @@ class GradeUpdateForm(forms.ModelForm):
         apply_grade(signup, signup.theory_mark, signup.lab_mark)
 
 
+class GradeUnlockForm(forms.ModelForm):
+    class Meta:
+        model = ClassSignup
+        fields = ["locked"]
+
+    def save(self):
+        signup = super().save(commit=False)
+        signup.locked = False
+        signup.save()
+
+
 class GradesCSVFileForm(forms.Form):
     def __init__(self, teaching, *args, **kwargs):
         self.teaching = teaching
@@ -235,6 +246,7 @@ class GradesCSVFileForm(forms.Form):
         rid_errors = []
         mark_errors = []
         row_errors = []
+        lock_errors = []
         next(rows)  # skip header
         for count, row in enumerate(rows):
             try:
@@ -262,6 +274,12 @@ class GradesCSVFileForm(forms.Form):
             if not exists:
                 rid_errors.append(registry_id)
 
+            is_locked = ClassSignup.objects.filter(
+                    student=student, teaching=self.teaching, locked=True
+            ).exists()
+            if is_locked:
+                lock_errors.append(registry_id)
+
         errors = []
         if rid_errors:
             errors.append(ValidationError(
@@ -277,6 +295,11 @@ class GradesCSVFileForm(forms.Form):
             errors.append(ValidationError(
                 _("The follwing rows are malformed: %(err)s"),
                 params={"err": ", ".join(row_errors)}))
+        if lock_errors:
+            errors.append(ValidationError(
+                _("The follwing rows are locked and their marks cannot be"
+                  " changed: %(err)s"),
+                params={"err": ", ".join(lock_errors)}))
 
         if errors:
             raise ValidationError(errors)
