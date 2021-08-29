@@ -8,6 +8,7 @@ from django.core.exceptions import PermissionDenied
 from django.shortcuts import render
 from django.db.models import Max
 
+from mainpage.views import init_render_dict
 from mainpage.models import Semesters
 from classes.models import Teaching, ClassSignup
 
@@ -99,7 +100,7 @@ def bar_classes_assigned_per_year(user_id):
     ax.set_xticklabels(years.keys())
     # Y axis: set integer ticks
     ax.yaxis.get_major_locator().set_params(integer=True)
-    # ax.bar_label(rects)
+    # Needs higher lib version:  ax.bar_label(rects)
     fig.tight_layout()
 
     output = io.StringIO()
@@ -184,12 +185,15 @@ def stats_student(request, uid):
         graphs[f"{year} {semester}"] = pie_classes_passed(uid, year, semester)
 
     passed, failed = num_total_classes_passed(uid)
-    return render(request, "stats_students.html", {
+
+    d = init_render_dict(request)
+    d.update({
         "pie": graphs,
         "total": failed + passed,
         "total_passed": passed,
         "total_failed": failed
     })
+    return render(request, "stats_students.html", d)
 
 
 def stats_teacher(request, uid):
@@ -226,4 +230,6 @@ def stats_teacher(request, uid):
 
     graphs["pies_students_years"] = pies_students_years
 
-    return render(request, "stats_teacher.html", graphs)
+    d = init_render_dict(request)
+    d.update(graphs)
+    return render(request, "stats_teacher.html", d)
