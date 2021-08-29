@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Classes | {{ dept.name }} | University{% endblock %}
+{% block title %}Classes | {{ dept.name }} | {{university.name}}{% endblock %}
 
 
 {% block content %}
@@ -13,36 +13,45 @@
 </div>
 
 
-<div class="basic-box-container">
+<div class="main-container">
   <h2>{{ dept.name }} Classes</h2>
   {% if perm.is_admin or perm.is_teacher %}
-  <div id="classes-menu">
-    <a id="class-insert-a" href="/departments/{{dept.id}}/classes/insert">Insert</a>
+  <div id="classes-menu" class="main-container-menu">
+    <a id="class-insert-a" class="filled-btn"
+       href="/departments/{{dept.id}}/classes/insert">
+      Insert
+    </a>
   </div>
   {% endif %}
 
-  <div class="entity-container">
+  <ul class="entity-container">
     {% for i in classes %}
-    <div class="entity-box">
+    <li class="entity-box">
       <div class="entity-box-title">{{ i.name }}</div>
-      <div class="entity-box-content">{{ i.description }}</div>
+
       <div class="entity-box-menu">
-        <a class="class-view-a"
-           href="/departments/{{dept.id}}/classes/{{i.public_id}}">
-          {% if perm.is_admin or perm.is_teacher %} Details/Edit
-          {% else %} Details
+        <div class="entity-box-menu-links">
+          <a class="class-view-a"
+             href="/departments/{{dept.id}}/classes/{{i.public_id}}">
+            {% if perm.is_admin or perm.is_teacher %} Details/Edit
+            {% else %} Details
+            {% endif %}
+          </a>
+        </div>
+        <div class="entity-box-menu-actions">
+          {% if perm.is_admin %}
+          <a class="class-delete-a util-btn danger-btn-mask"
+             href="/departments/{{dept.id}}/classes/{{i.public_id}}/delete">
+            Delete
+          </a>
           {% endif %}
-        </a>
-        {% if perm.is_admin %}
-        <a class="class-delete-a"
-           href="/departments/{{dept.id}}/classes/{{i.public_id}}/delete">
-          Delete
-        </a>
-        {% endif %}
+        </div>
       </div>
-    </div>
+
+      <div class="entity-box-content">{{i.description|truncatechars:250}}</div>
+    </li>
     {% endfor %}
-  </div>
+  </ul>
 </div>
 
 {% endblock %}
