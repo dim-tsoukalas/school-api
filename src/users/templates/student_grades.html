@@ -5,21 +5,15 @@
 
 {% block content %}
 
-<div id="modal">
-  <div id="modal-container">
-    <span id="modal-close">&times;</span>
-    <div id="modal-content"></div>
-  </div>
-</div>
-
-
-<div class="basic-box-container">
+<div class="main-container">
   <h2>Grades</h2>
+
+  <br>
 
   {% for name, signups in classes.items %}
 
-  <h3>{{ name }}</h3>
-  <table>
+  <h4>{{ name }}</h4>
+  <table class="base-table">
     <thead>
       <tr>
         <th>Year</th>
