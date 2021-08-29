@@ -13,13 +13,36 @@
 </div>
 
 
-<div class="basic-box-container">
-  <h2>My Classes</h2>
+<div class="main-container">
+  <h2>My Teachings</h2>
 
-  <div class="entity-container">
+  <ul class="entity-container">
     {% for i in teachings %}
-    <div class="entity-box">
+    <li class="entity-box">
       <div class="entity-box-title">{{ i.class_id.name }}</div>
+
+      <div class="entity-box-menu">
+        <div class="entity-box-menu-links">
+          <a class="class-view-a"
+             href="/departments/{{i.class_id.department.id}}
+/classes/{{i.class_id.public_id}}">
+            Details
+          </a>
+          <a class="class-update-a"
+             href="/departments/{{i.class_id.department.id}}
+/classes/{{i.class_id.public_id}}/teaching/{{i.id}}/grades">
+            Grades
+          </a>
+        </div>
+        <div class="entity-box-menu-actions">
+          <a class="class-update-a util-btn"
+             href="/departments/{{i.class_id.department.id}}
+/classes/{{i.class_id.public_id}}/teaching/{{i.id}}/update">
+            Edit
+          </a>
+        </div>
+      </div>
+
       <div class="entity-box-content">
         <table>
           <tr><td>{{i.year}}</td><td>{{i.semester}} semester</td></tr>
@@ -37,23 +60,10 @@
           </tr>
         </table>
       </div>
-      <div class="entity-box-menu">
-        <a class="class-view-a"
-           href="/departments/{{i.class_id.department.id}}/classes/{{i.class_id.public_id}}">
-          Details
-        </a>
-        <a class="class-update-a"
-           href="/departments/{{i.class_id.department.id}}/classes/{{i.class_id.public_id}}/teaching/{{i.id}}/update">
-          Edit
-        </a>
-        <a class="class-update-a"
-           href="/departments/{{i.class_id.department.id}}/classes/{{i.class_id.public_id}}/teaching/{{i.id}}/grades">
-          Grades
-        </a>
-      </div>
-    </div>
+
+    </li>
     {% endfor %}
-  </div>
+  </ul>
 </div>
 
 {% endblock %}
