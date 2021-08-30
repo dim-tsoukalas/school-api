@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}My Classes | University{% endblock %}
+
+
+{% block content %}
+
+<div id="modal">
+  <div id="modal-container">
+    <span id="modal-close">&times;</span>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+
+<div class="main-container">
+  <h2>My Teachings</h2>
+
+  <ul class="entity-container">
+    {% for i in teachings %}
+    <li class="entity-box">
+      <div class="entity-box-title">{{ i.class_id.name }}</div>
+
+      <div class="entity-box-menu">
+        <div class="entity-box-menu-links">
+          <a class="class-view-a"
+             href="/departments/{{i.class_id.department.id}}
+/classes/{{i.class_id.public_id}}">
+            Details
+          </a>
+          <a class="class-update-a"
+             href="/departments/{{i.class_id.department.id}}
+/classes/{{i.class_id.public_id}}/teaching/{{i.id}}/grades">
+            Grades
+          </a>
+        </div>
+        <div class="entity-box-menu-actions">
+          <a class="class-update-a util-btn"
+             href="/departments/{{i.class_id.department.id}}
+/classes/{{i.class_id.public_id}}/teaching/{{i.id}}/update">
+            Edit
+          </a>
+        </div>
+      </div>
+
+      <div class="entity-box-content">
+        <table>
+          <tr><td>{{i.year}}</td><td>{{i.semester}} semester</td></tr>
+          <tr>
+            <td>Theory weight</td>
+            {% if i.theory_weight is None %} <td>Not set</td>
+            {% else %} <td>{{i.theory_weight}}</td>
+            {% endif %}
+          </tr>
+          <tr>
+            <td>Lab weight</td>
+            {% if i.lab_weight is None %} <td>Not set</td>
+            {% else %} <td>{{i.lab_weight}}</td>
+            {% endif %}
+          </tr>
+        </table>
+      </div>
+
+    </li>
+    {% endfor %}
+  </ul>
+</div>
+
+{% endblock %}

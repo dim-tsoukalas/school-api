@@ -1,3 +1,7 @@
 <a href="/departments">Departments</a>
+
+{% if dept.name %}
+<a href="/departments/{{dept.id}}/classes">Classes</a>
+{% endif %}
+
 <a href="/users">Users</a>
-<a href="/signout">Sign out</a>

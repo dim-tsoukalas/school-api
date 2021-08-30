@@ -1,39 +1,49 @@
 {% extends "base.html" %}
 
-{% block title %}Departments | University{% endblock %}
+{% block title %}Departments | {{university.name}}{% endblock %}
 
 
 {% block content %}
 
-<div class="basic-box-container">
+<div class="main-container">
   <h2>Departments</h2>
   {% if user.is_superuser %}
-  <div id="departments-menu">
-    <a id="dept-insert-a" href="/departments/insert">Insert</a>
+  <div id="departments-menu" class="main-container-menu">
+    <a id="dept-insert-a" href="/departments/insert" class="filled-btn">Insert</a>
   </div>
   {% endif %}
 
-  <div class="entity-container">
+  <ul class="entity-container">
     {% for i in departments %}
-    <div class="entity-box">
+    <li class="entity-box">
       <div class="entity-box-title">{{ i.name }}</div>
-      <div class="entity-box-content">{{ i.description }}</div>
+
       <div class="entity-box-menu">
-        <a class="dept-classes-a" href="/departments/{{i.id}}/classes">
-          Classes
-        </a>
-        {% if user.is_superuser %}
-        <a class="dept-edit-a" href="/departments/{{i.id}}/update">
-          Edit
-        </a>
-        <a class="dept-delete-a" href="/departments/{{i.id}}/delete">
-          Delete
-        </a>
-        {% endif %}
+        <div class="entity-box-menu-links">
+          <a class="" href="/departments/{{i.id}}/classes">Classes</a>
+        </div>
+        <div class="entity-box-menu-actions">
+          {% if user.is_superuser or user.is_deptadmin and i.id == user.deptadmin.department.id %}
+          <a class="dept-edit-a util-btn" href="/departments/{{i.id}}/state">
+            {{i.year}} {{i.semester|capfirst|slice:2}} / {{i.state|capfirst}}
+          </a>
+          <a class="dept-edit-a util-btn" href="/departments/{{i.id}}/update">
+            Edit
+          </a>
+          {% endif %}
+          {% if user.is_superuser %}
+          <a class="dept-delete-a util-btn danger-btn-mask" href="/departments/{{i.id}}/delete">
+            Delete
+          </a>
+          {% endif %}
+        </div>
       </div>
-    </div>
+
+      <div class="entity-box-content">{{ i.description|truncatechars:250 }}</div>
+
+    </li>
     {% endfor %}
-  </div>
+  </ul>
 </div>
 
 {% endblock %}

@@ -3,13 +3,19 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate
 from django.db import transaction
+from django.db.models import Max
 from django.utils.translation import gettext_lazy as _
+
+from classes.models import Classes, PrerequisiteClasses, Teaching, ClassSignup
 
 from .models import User, Student, Teacher, Deptadmin
 from mainpage.models import Department, DepartmentStudents, DepartmentTeachers
 from mainpage.forms import DepartmentChoiceField
 
 import datetime
+
+
+PASSING_MARK = 5
 
 
 # ====================================================================
@@ -155,8 +161,7 @@ class StudentSignupForm(UserCreationForm):
         return user
 
 
-class StudentUpdateForm(forms.Form):
-    user_id = forms.IntegerField(required=True)
+class StudentUpdateForm(forms.ModelForm):
     department = DepartmentChoiceField(
         queryset=Department.objects.all(),
         required=True
@@ -167,9 +172,6 @@ class StudentUpdateForm(forms.Form):
     admission_year = forms.IntegerField(
         min_value=2000, max_value=datetime.datetime.now().year, required=True
     )
-    email = forms.EmailField(
-        max_length=254, help_text="Required. Enter a valid email address."
-    )
 
     error_messages = {
         "email_exists": _("This email is used by another user."),
@@ -177,9 +179,14 @@ class StudentUpdateForm(forms.Form):
                                 " exists."),
     }
 
+    class Meta:
+        model = User
+        fields = ["department", "first_name", "last_name", "registry_id",
+                  "admission_year", "email"]
+
     def clean(self):
         cleaned_data = super().clean()
-
+        """
         email = cleaned_data.get("email")
         exists = User.objects.filter(email=email)
         if exists and not exists[0].id == cleaned_data.get("user_id"):
@@ -187,10 +194,10 @@ class StudentUpdateForm(forms.Form):
                 self.error_messages["email_exists"],
                 code="email_exists"
             )
-
+        """
         reg_id = cleaned_data.get("registry_id")
         exists = Student.objects.filter(registry_id=reg_id)
-        if exists and not exists[0].user.id == cleaned_data.get("user_id"):
+        if exists and not exists[0].user.email == cleaned_data.get("email"):
             raise ValidationError(
                 self.error_messages["registry_id_exists"],
                 code="registry_id_exists"
@@ -200,8 +207,7 @@ class StudentUpdateForm(forms.Form):
 
     @transaction.atomic
     def save(self):
-        user = User.objects.get(id=self.cleaned_data.get("user_id"))
-        user.email = self.cleaned_data.get("email")
+        user = super().save(commit=False)
         user.save()
         student = Student.objects.get(user=user)
         student.first_name = self.cleaned_data.get("first_name")
@@ -213,6 +219,93 @@ class StudentUpdateForm(forms.Form):
         dept.dept_id = self.cleaned_data.get("department")
         dept.save()
         return user
+
+
+class StudentClassSignupForm(forms.Form):
+
+    def __init__(self, student_obj, *args, **kwargs):
+        super(StudentClassSignupForm, self).__init__(*args, **kwargs)
+        self.student_obj = student_obj
+
+        self.year = Teaching.objects.aggregate(Max("year"))["year__max"]
+        self.semester = Teaching.objects.filter(year=self.year).aggregate(
+            Max("semester"))["semester__max"]
+
+        # Classes for which the student has already signed up for.
+        initial = ClassSignup.objects.filter(
+            student=student_obj,
+            teaching__year=self.year,
+            teaching__semester=self.semester
+        ).values_list("teaching__class_id__id", flat=True)
+
+        self.initial["classes"] = list(initial)
+
+        self.fields["classes"] = forms.MultipleChoiceField(
+            label="",
+            required=False,
+            choices=self._get_available_signup_classes(),
+            widget=forms.CheckboxSelectMultiple()
+        )
+
+    def _get_available_signup_classes(self):
+        teachings = Teaching.objects.filter(
+            year=self.year, semester=self.semester
+        )
+        acc = []
+        for teaching in teachings:
+            # Skip passed class.
+            passed = ClassSignup.objects.filter(
+                student=self.student_obj, final_mark__gte=PASSING_MARK,
+                teaching=teaching
+            ).exists()
+            if passed:
+                continue
+
+            # Skip the class if there are prerequisite classes that the student
+            # has not passed.
+            if self._has_passed_prerequisite_classes(teaching.class_id):
+                class_obj = teaching.class_id
+                acc.append((class_obj.id, class_obj.name))
+
+        return acc
+
+    def _has_passed_prerequisite_classes(self, class_obj):
+        prerequisites = PrerequisiteClasses.objects.filter(
+            class_id=class_obj
+        )
+        for prerequisite in prerequisites:
+            teachings = Teaching.objects.filter(
+                class_id=prerequisite.prerequisite_id
+            )
+            passed = False
+            for teaching in teachings:
+                passed = ClassSignup.objects.filter(
+                    student=self.student_obj, final_mark__gte=PASSING_MARK,
+                    teaching=teaching
+                ).exists()
+                if passed:
+                    break
+            if not passed:
+                return False
+
+        return True
+
+    def save(self):
+        self._delete_old_signup()
+
+        for i in self.cleaned_data["classes"]:
+            class_obj = Classes.objects.get(id=i)
+            teaching = Teaching.objects.get(
+                class_id=class_obj, year=self.year, semester=self.semester)
+            ClassSignup.objects.create(
+                teaching=teaching, student=self.student_obj)
+
+    def _delete_old_signup(self):
+        ClassSignup.objects.filter(
+            student=self.student_obj,
+            teaching__year=self.year,
+            teaching__semester=self.semester
+        ).delete()
 
 
 # Teacher ============================================================
@@ -253,8 +346,7 @@ class TeacherSignupForm(UserCreationForm):
         return user
 
 
-class TeacherUpdateForm(forms.Form):
-    user_id = forms.IntegerField(required=True)
+class TeacherUpdateForm(forms.ModelForm):
     department = DepartmentChoiceField(
         queryset=Department.objects.all(),
         required=True
@@ -264,31 +356,18 @@ class TeacherUpdateForm(forms.Form):
     rank = forms.ChoiceField(
         choices=Teacher.TeacherRanks.choices, required=True
     )
-    email = forms.EmailField(
-        max_length=254, help_text="Required. Enter a valid email address."
-    )
 
     error_messages = {
         "email_exists": _("This email is used by another user.")
     }
 
-    def clean(self):
-        cleaned_data = super().clean()
-
-        email = cleaned_data.get("email")
-        exists = User.objects.filter(email=email)
-        if exists and not exists[0].id == cleaned_data.get("user_id"):
-            raise ValidationError(
-                self.error_messages["email_exists"],
-                code="email_exists"
-            )
-
-        return cleaned_data
+    class Meta:
+        model = User
+        fields = ["department", "first_name", "last_name", "rank", "email"]
 
     @transaction.atomic
     def save(self):
-        user = User.objects.get(id=self.cleaned_data.get("user_id"))
-        user.email = self.cleaned_data.get("email")
+        user = super().save(commit=False)
         user.save()
         teacher = Teacher.objects.get(user=user)
         teacher.first_name = self.cleaned_data.get("first_name")
@@ -329,37 +408,23 @@ class DeptadminSignupForm(UserCreationForm):
         return user
 
 
-class DeptadminUpdateForm(forms.Form):
-    user_id = forms.IntegerField(required=True)
+class DeptadminUpdateForm(forms.ModelForm):
     department = DepartmentChoiceField(
         queryset=Department.objects.all(),
         required=True
-    )
-    email = forms.EmailField(
-        max_length=254, help_text="Required. Enter a valid email address."
     )
 
     error_messages = {
         "email_exists": _("This email is used by another user.")
     }
 
-    def clean(self):
-        cleaned_data = super().clean()
-
-        email = cleaned_data.get("email")
-        exists = User.objects.filter(email=email)
-        if exists and not exists[0].id == cleaned_data.get("user_id"):
-            raise ValidationError(
-                self.error_messages["email_exists"],
-                code="email_exists"
-            )
-
-        return cleaned_data
+    class Meta:
+        model = User
+        fields = ["department", "email"]
 
     @transaction.atomic
     def save(self):
-        user = User.objects.get(id=self.cleaned_data.get("user_id"))
-        user.email = self.cleaned_data.get("email")
+        user = super().save(commit=False)
         user.save()
         deptadmin = Deptadmin.objects.get(user=user)
         deptadmin.department = self.cleaned_data.get("department")

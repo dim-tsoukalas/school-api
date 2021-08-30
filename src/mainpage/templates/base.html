@@ -2,34 +2,84 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>{% block title %}University{% endblock %}</title>
+    <title>{% block title %}{{university.name}}{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'base.css' %}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
   </head>
+
   <body>
+
     <header>
-      <nav class="logo-menu">
-        <a class="logo" href="/"></a>
-        {% block logo_menu_content %}{% endblock %}
-        <div class="searchbar">
-          <form action="/search">
-            <input type="text" placeholder="Search..." name="search">
-            <input type="submit" value="&#x279C;">
-          </form>
+      <div class="logo-container">
+        <div class="logo-organiztion">
+          <a class="logo" href="/"></a>
+          <span class="uni-title">{{university.name}}</span>
         </div>
-      </nav>
-      <nav class="main-menu">
-        {% block main_menu_content %}{% endblock %}
+        <div class="logo-department">
+          <span class="dept-title">
+            {% if user.is_student %}
+                {{user.student.departments.0.dept_id.name}}
+            {% elif user.is_teacher %}
+                {{user.teacher.departments.0.dept_id.name}}
+            {% elif user.is_deptadmin %}
+                {{user.deptadmin.department.name}}
+            {% else %}
+                {{dept.name}}
+            {% endif %}
+          </span>
+        </div>
+      </div>
+
+      <nav class="menu">
+        <div class="menu-container">
+
+          <div class="menu-user-row">
+            {% if user.is_authenticated %}
+            <div class="menu-user">
+              <a href="/signout" class="border-btn">Sign out</a>
+              <a href="/edit" class="border-btn">Edit</a>
+              <a href="/edit" class="menu-user-a">{{user.object.email}}</a>
+            </div>
+            {% else %}
+            {% comment %} Requires: signin_form {% endcomment %}
+            {% include "signinbar.html" %}
+            {% endif %}
+
+            <div class="searchbar">
+              <form action="/search" method="GET">
+                <input type="text" placeholder="Search..." name="q">
+                <input type="submit" value="&#x279C;">
+              </form>
+            </div>
+          </div>
+
+          <div class="menu-links-row">
+                    {% block main_menu_content %}{% endblock %}
         {% if not user.is_authenticated %}
 
-            {% comment %} Requires: signin_form {% endcomment %}
             {% include "guest_menu.html" %}
 
         {% elif user.is_superuser %}
 
-             {% include "superuser_menu.html" %}
+            {% include "superuser_menu.html" %}
+
+        {% elif user.is_deptadmin %}
+
+            {% include "deptadmin_menu.html" %}
+
+        {% elif user.is_teacher %}
+
+            {% include "teacher_menu.html" %}
+
+        {% elif user.is_student %}
+
+            {% include "student_menu.html" %}
 
         {% endif %}
+
+          </div>
+
+        </div>
       </nav>
     </header>
 

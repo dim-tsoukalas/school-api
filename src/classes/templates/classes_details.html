@@ -13,55 +13,88 @@
 </div>
 
 
-<div class="basic-box-container">
+<div class="main-container">
   <h2>{{ class.name }} [{{ class.public_id }}]</h2>
+
+  {% if perm.is_admin or perm.is_teacher %}
+  <div class="main-container-menu">
+    <a id="class-info-edit-a" class="filled-btn"
+       href="/departments/{{dept.id}}/classes/{{class.public_id}}/info/update">
+      Edit
+    </a>
+  </div>
+  {% endif %}
 
   {% if not class.description %}
   <p>No description for this class.</p>
   {% else %}
   <p>{{class.description}}</p>
   {% endif %}
-
-  {% if perm.is_admin or perm.is_teacher %}
-  <div class="entity-box-menu">
-    <a id="class-info-edit-a"
-       href="/departments/{{dept.id}}/classes/{{class.public_id}}/info/update">
-      Edit
-    </a>
-  </div>
-  {% endif %}
 </div>
 
 
-<div class="basic-box-container">
+<div class="main-container">
   <h3>Prerequisite Classes</h3>
-  {% for i in class.req_classes %}
-  <a href="/departments/{{dept.id}}/classes/{{i.prerequisite_id.public_id}}">
-    i.prerequisite_id.name
-  </a>
-  {% endfor %}
+
+  {% if perm.is_admin or perm.is_teacher %}
+  <div class="main-container-menu">
+    <a id="req-classes-edit-a" class="filled-btn"
+       href="/departments/{{dept.id}}/classes/{{class.public_id}}/prerequisites/insert">
+      Add
+    </a>
+  </div>
+  {% endif %}
+
+  <table class="base-table">
+    <thead>
+      <th>Class name</th>
+    </thead>
+
+    <tbody>
+      {% for i in class.req_classes %}
+      <tr>
+        <td>
+          <a href="/departments/{{dept.id}}/classes/{{i.prerequisite_id.public_id}}">
+            {{i.prerequisite_id.name}}
+          </a>
+        </td>
+        {% if perm.is_admin or perm.is_teacher %}
+        <td>
+          <a class="filled-btn danger-btn-mask" href="/departments/{{dept.id}}
+/classes/{{class.public_id}}/prerequisites/{{i.id}}/delete">
+            Delete
+          </a>
+        </td>
+        {% endif %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 
   {% if not class.req_classes %}
   <p>No prerequisite classes for this class.</p>
   {% endif %}
-
-  {% if perm.is_admin or perm.is_teacher %}
-  <div class="entity-box-menu">
-    <a id="req-classes-edit-a" href="">Edit</a>
-  </div>
-  {% endif %}
 </div>
 
 
-{% if perm.is_admin or perm.is_teacher %}
-<div class="basic-box-container">
+{% if user.is_authenticated %}
+<div class="main-container">
   <h3>Teachings</h3>
+
+  {% if perm.is_admin %}
+  <div class="main-container-menu">
+    <a id="teaching-add-a" class="filled-btn"
+       href="/departments/{{dept.id}}/classes/{{class.public_id}}/teaching/insert">
+      Add
+    </a>
+  </div>
+  {% endif %}
 
   {% if not class.teachings %}
   <p>No teaching was found for this class.</p>
 
   {% else %}
-  <table>
+  <table class="base-table">
     <thead>
       <th>Year</th>
       <th>Semester</th>
@@ -71,42 +104,52 @@
       <th>Theory limit</th>
       <th>Lab limit</th>
     </thead>
+
     <tbody>
       {% for i in class.teachings %}
       <tr>
         <td>{{ i.year }}</td>
         <td>{{ i.semester }}</td>
-        <td>{{ i.teacher.first_name }} {{ i.teacher.last_name }} ({{ i.teacher.user.email }})</td>
+        <td>{{ i.teacher.first_name }} {{ i.teacher.last_name }}
+          ({{ i.teacher.user.email }})
+        </td>
         <td>{{ i.theory_weight }}</td>
         <td>{{ i.lab_weight }}</td>
         <td>{{ i.theory_limit }}</td>
         <td>{{ i.lab_limit }}</td>
+
+        {% if perm.is_admin or perm.is_teacher and user.object.email == i.teacher.user.email %}
         <td>
-          <a class="teaching-update-a"
-             href="/departments/{{dept.id}}/classes/{{class.public_id}}/teaching/{{i.id}}/update">
+          <a class="teaching-update-a filled-btn"
+             href="/departments/{{dept.id}}/classes/{{class.public_id}}
+/teaching/{{i.id}}/update">
             Edit
           </a>
         </td>
         <td>
-          <a class="teaching-delete-a"
-             href="/departments/{{dept.id}}/classes/{{class.public_id}}/teaching/{{i.id}}/delete">
+          <a class="teaching-update-a filled-btn link-btn"
+             href="/departments/{{dept.id}}/classes/{{class.public_id}}
+/teaching/{{i.id}}/grades">
+            Grades
+          </a>
+        </td>
+        {% endif %}
+
+        {% if perm.is_admin %}
+        <td>
+          <a class="teaching-delete-a filled-btn danger-btn-mask"
+             href="/departments/{{dept.id}}/classes/{{class.public_id}}
+/teaching/{{i.id}}/delete">
             Delete
           </a>
         </td>
+        {% endif %}
       </tr>
       {% endfor %}
     </tbody>
   </table>
   {% endif %}
 
-  {% if perm.is_admin or perm.is_teacher %}
-  <div class="entity-box-menu">
-    <a id="teaching-add-a"
-       href="/departments/{{dept.id}}/classes/{{class.public_id}}/teaching/insert">
-      Add
-    </a>
-  </div>
-  {% endif %}
 </div>
 {% endif %}
 

@@ -1,5 +1,6 @@
 from django.db import models
-from django.utils.translation import gettext_lazy as _
+
+from mainpage.models import Semesters
 
 
 class Classes(models.Model):
@@ -25,23 +26,22 @@ class PrerequisiteClasses(models.Model):
     prerequisite_id = models.ForeignKey(
         Classes, related_name="class_id", on_delete=models.CASCADE)
 
+    class Meta:
+        unique_together = ("class_id", "prerequisite_id")
+
 
 class Teaching(models.Model):
     class_id = models.ForeignKey(Classes, on_delete=models.CASCADE)
     year = models.CharField(max_length=4)
 
-    class Semesters(models.TextChoices):
-        FIRST = "first", _("First Semester")  # xeimerino
-        SECOND = "second", _("Second Semester")  # earino
-
     semester = models.CharField(max_length=15, choices=Semesters.choices)
     teacher = models.ForeignKey("users.Teacher", on_delete=models.CASCADE)
 
-    # Allow from 1% to 99%. If either is 100%, both must be set to null.
+    # Both of them should amount to 1.00. Both must be set.
     theory_weight = models.DecimalField(
-        max_digits=2, decimal_places=2, blank=True, null=True)
+        max_digits=3, decimal_places=2, blank=True, null=True)
     lab_weight = models.DecimalField(
-        max_digits=2, decimal_places=2, blank=True, null=True)
+        max_digits=3, decimal_places=2, blank=True, null=True)
 
     theory_limit = models.CharField(max_length=4, blank=True)
     lab_limit = models.CharField(max_length=4, blank=True)
@@ -55,3 +55,34 @@ class ClassSignup(models.Model):
         max_digits=5, decimal_places=2, null=True)
     lab_mark = models.DecimalField(max_digits=5, decimal_places=2, null=True)
     final_mark = models.DecimalField(max_digits=5, decimal_places=2, null=True)
+    locked = models.BooleanField(default=False)
+
+    def get_previous_theory_grade(signup):
+        year = signup.teaching.year
+        teachings = Teaching.objects.filter(class_id=signup.teaching.class_id)
+        signups = ClassSignup.objects.exclude(
+            teaching__year=year
+        ).filter(
+            student=signup.student, teaching__in=teachings
+        ).order_by("-teaching__year")
+
+        for i in signups:
+            if i.theory_mark and i.teaching.year >= year:
+                return i.teaching.year, i.theory_mark
+
+        return None, None
+
+    def get_previous_lab_grade(signup):
+        year = signup.teaching.year
+        teachings = Teaching.objects.filter(class_id=signup.teaching.class_id)
+        signups = ClassSignup.objects.exclude(
+            teaching__year=year
+        ).filter(
+            student=signup.student, teaching__in=teachings
+        ).order_by("-teaching__year")
+
+        for i in signups:
+            if i.lab_mark and i.teaching.year >= year:
+                return i.teaching.year, i.lab_mark
+
+        return None, None

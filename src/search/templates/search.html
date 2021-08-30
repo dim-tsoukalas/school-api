@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Search | University{% endblock %}
+
+
+{% block content %}
+
+<div class="basic-box-container">
+  <h2>Search</h2>
+
+  <div class="searchbar">
+    <form action="/search" method="GET">
+      <input type="text" placeholder="Search..." name="q">
+      <input type="submit" value="&#x279C;">
+    </form>
+  </div>
+
+
+  {% for i in results %}
+  <div class="search-result">
+    <div class="search-result-title">
+      <a href="/departments/{{i.department.id}}/classes/{{i.public_id}}">
+        {{i.department.name}}: {{i.name}}
+      </a>
+    </div>
+    <div class="search-result-description">
+      {{ i.description|truncatechars:190 }}
+    </div>
+  </div>
+  {% endfor %}
+
+</div>
+
+{% endblock %}

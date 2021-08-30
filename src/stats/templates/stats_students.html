@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Stats | University{% endblock %}
+
+
+{% block content %}
+
+<div class="main-container">
+  <h2>Grades</h2>
+
+  <p><b>Total passed:</b> {{total_passed}}/{{total}}</p>
+
+  {% for group, chart in pie.items %}
+
+  <br>
+
+  <h4>{{ group }}</h4>
+
+  <img src="data:image/svg+xml;base64, {{chart}}" alt="graph"></img>
+
+  {% endfor %}
+</div>
+
+{% endblock %}

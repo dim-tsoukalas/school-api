@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Stats | University{% endblock %}
+
+
+{% block content %}
+
+<div class="main-container">
+  <h2>Grades</h2>
+
+  <p><b>Total passed:</b> {{text_students.passed}}/{{text_students.total}}</p>
+
+  <br>
+
+  <h4>Classes assigned per year</h4>
+  <img src="data:image/svg+xml;base64, {{bar_classes}}" alt="graph"></img>
+
+  <br><br>
+
+  <h4>Students passed per class</h4>
+  <div id="years-menu">
+    {% for year in pies_students_years %}
+    <a href="/users/{{user.id}}/stats?students_graphs_year={{year}}#st-pass-yr">{{ year }}</a>
+    {% endfor %}
+  </div>
+
+  {% for pie in pies_students %}
+
+  <img src="data:image/svg+xml;base64, {{pie}}" alt="graph"></img>
+
+  {% endfor %}
+</div>
+
+{% endblock %}

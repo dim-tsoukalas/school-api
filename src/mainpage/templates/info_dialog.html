@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+
+{% block title %}{{title}} | University{% endblock %}
+
+
+{% block content %}
+
+<div class="main-container">
+  <div id="confirm-form">
+    <p>{{message}}</p>
+    <div class="confirm-form-choices">
+      <a id="confirm-form-return" href="{{url}}">Ok</a>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
