@@ -1,1 +1,5 @@
-<a href="/departments">Departments</a>
+{% url "departments" as target_url %}
+<a href={{target_url}}
+   {% if request.path == target_url %} class="menu-current" {% endif %}>
+  Departments
+</a>

@@ -1,4 +1,23 @@
-<a href="/departments">Departments</a>
-<a href="/users/{{user.id}}/classes/signup">Class signup</a>
-<a href="/users/{{user.id}}/grades">Grades</a>
-<a href="/users/{{user.id}}/stats">Stats</a>
+{% url "departments" as target_url %}
+<a href={{target_url}}
+   {% if request.path == target_url %} class="menu-current" {% endif %}>
+  Departments
+</a>
+
+{% url "class_signup" user.id as target_url %}
+<a href={{target_url}}
+   {% if request.path == target_url %} class="menu-current" {% endif %}>
+  Class signup
+</a>
+
+{% url "grades" user.id as target_url %}
+<a href={{target_url}}
+   {% if request.path == target_url %} class="menu-current" {% endif %}>
+  Grades
+</a>
+
+{% url "stats" user.id as target_url %}
+<a href={{target_url}}
+   {% if request.path == target_url %} class="menu-current" {% endif %}>
+  Stats
+</a>

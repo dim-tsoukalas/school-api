@@ -43,10 +43,14 @@ urlpatterns = [
     path("users/<int:uid>/activate", users.views.activate),
     path("users/<int:uid>/deactivate", users.views.deactivate),
 
-    path("users/<int:uid>/classes/signup", users.views.classes_signup),
-    path("users/<int:uid>/grades", users.views.grades),
+    path("users/<int:uid>/classes/signup", users.views.classes_signup,
+         name="class_signup"),
+    path("users/<int:uid>/grades", users.views.grades, name="grades"),
+
+    path("users/<int:user_id>/teachings", classes.views.my_teachings,
+         name="teachings"),
     # Stats
-    path("users/<int:uid>/stats", stats.views.stats),
+    path("users/<int:uid>/stats", stats.views.stats, name="stats"),
     # Superuser
     path("superuser", staff.views.superuser, name="superuser"),
     path("superuser/departments", staff.views.superuser_departments,
@@ -63,8 +67,8 @@ urlpatterns = [
     path("departments/<int:dept_id>/delete",
          mainpage.views.departments_delete),
     # Classes
-    path("departments/<int:dept_id>/classes",
-         classes.views.classes, name="classes"),
+    path("departments/<int:dept_id>/classes", classes.views.classes,
+         name="classes"),
     path("departments/<int:dept_id>/classes/<str:class_public_id>/delete",
          classes.views.delete),
     path("departments/<int:dept_id>/classes/insert", classes.views.insert,
@@ -111,6 +115,5 @@ urlpatterns = [
          classes.views.grade_unlock),
     path(("departments/<int:dept_id>/classes/<str:class_public_id>"
           "/teaching/<int:teaching_id>/grades/<int:grade_id>/update"),
-         classes.views.grade_update),
-    path("users/<int:user_id>/teachings", classes.views.my_teachings)
+         classes.views.grade_update)
 ]

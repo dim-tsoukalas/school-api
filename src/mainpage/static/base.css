@@ -102,6 +102,11 @@ header {
     background-color: #222;
 }
 
+.menu-current {
+    background-color: #fff;
+    color: #223344;
+}
+
 
 /* ******************************************************************
  * Menu: User
