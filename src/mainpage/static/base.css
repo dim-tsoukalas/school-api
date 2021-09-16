@@ -407,6 +407,38 @@ li.entity-box {
 }
 
 
+/* search-result */
+
+ul.search-result {
+    display: flex;
+    align-items: stretch;
+    justify-content: left;
+    flex-wrap: wrap;
+
+    list-style: none;
+    padding: 0;
+    margin-top: 15px;
+
+    background-color: #fff;
+}
+
+ul.search-result li {
+    display: flex;
+    flex-direction: column;
+    padding: 5px;
+    width: 100%;
+
+}
+
+ul.search-result span {
+    margin-top: 5px;
+}
+
+ul.search-result hr {
+    width: 100%;
+    border: 1px solid #eee;
+}
+
 
 /* ******************************************************************
  * Content: Modal
