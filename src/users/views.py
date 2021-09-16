@@ -685,7 +685,9 @@ def signin(request):
     else:
         form = SigninForm()
 
-    return render(request, "mainpage.html", {"signin_form": form})
+    d = init_render_dict(request)
+    d["user"]["signin_form"] = form
+    return render(request, "departments.html", d)
 
 
 def signout(request):
