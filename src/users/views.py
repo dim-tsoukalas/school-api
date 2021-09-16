@@ -1,6 +1,7 @@
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth import login, logout
 from django.shortcuts import render, redirect
+from django.contrib.auth.forms import PasswordChangeForm
 
 from mainpage.views import init_render_dict
 from mainpage.models import States, DepartmentStudents, DepartmentTeachers
@@ -9,7 +10,7 @@ from classes.models import ClassSignup
 
 from .models import User, Teacher, Student, Deptadmin
 from .forms import (
-    UserActionForm,
+    UserActionForm, UserEmailForm,
     StudentSignupForm, StudentUpdateForm, StudentClassSignupForm,
     TeacherSignupForm, TeacherUpdateForm,
     DeptadminSignupForm, DeptadminUpdateForm,
@@ -378,17 +379,58 @@ def insert_student_post(request, d):
 def update(request, uid):
     d = init_render_dict(request)
 
-    if request.user.is_superuser:
+    if d["user"].get("id") == uid:
+        return update_self(request, uid, d)
+    elif request.user.is_superuser:
         return update_superuser(request, uid, d)
     elif d["user"].get("is_deptadmin"):
         # Ensure that the deptadmin is allowed to edit this user.
         if not has_perm_deptadmin(request, uid):
             raise PermissionDenied
         return update_deptadmin(request, uid, d)
-    elif d["user"].get("id") == uid:
-        pass
     else:
         raise PermissionDenied
+
+
+def update_self(request, uid, d):
+    if request.method == "POST":
+        return update_self_post(request, uid, d)
+
+    return update_self_get(request, uid, d)
+
+
+def update_self_get(request, uid, d, email_form=None, pass_form=None):
+    email_form = email_form if email_form else UserEmailForm(
+        instance=request.user)
+    pass_form = pass_form if pass_form else PasswordChangeForm(request.user)
+
+    d = init_render_dict(request)
+    d.update({
+        "settings_email": {
+            "form": email_form
+        },
+        "settings_password": {
+            "form": pass_form
+        }
+    })
+    return render(request, "users_update_self.html", d)
+
+
+def update_self_post(request, uid, d):
+    if request.POST.get("mode") == "email":
+        form = UserEmailForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            return redirect("users_update", uid)
+        else:
+            return update_self_get(request, uid, d, email_form=form)
+    elif request.POST.get("mode") == "password":
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("home")
+        else:
+            return update_self_get(request, uid, d, pass_form=form)
 
 
 def update_superuser(request, uid, d):

@@ -106,6 +106,13 @@ class UserActionForm(forms.Form):
         user.save()
 
 
+class UserEmailForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ["email"]
+        labels = {"email":  "Email"}
+
+
 # Student ============================================================
 
 class StudentSignupForm(UserCreationForm):

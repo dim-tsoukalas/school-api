@@ -37,7 +37,7 @@ urlpatterns = [
     path("users/insert/teacher", users.views.insert_teacher),
     path("users/insert/student", users.views.insert_student),
     # -- Update
-    path("users/<int:uid>/update", users.views.update),
+    path("users/<int:uid>/update", users.views.update, name="users_update"),
     path("users/<int:uid>/accept", users.views.accept),
     path("users/<int:uid>/delete", users.views.delete),
     path("users/<int:uid>/activate", users.views.activate),
