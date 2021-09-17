@@ -4,7 +4,7 @@
 
   <div>
     {% for error in user.signin_form.non_field_errors %}
-       <label class="form-error">{{ error }}</label>
+       <label class="error">{{ error }}</label>
     {% endfor %}
   </div>
 
@@ -13,7 +13,7 @@
   <div>
     {% for field in user.signin_form %}
       {% for error in field.errors %}
-        <label class="form-error">{{ error }}</label>
+        <label class="error">{{ error }}</label>
       {% endfor %}
       {% endfor %}
   </div>

@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 
-{% block title %}Sign up | University{% endblock %}
+{% block title %}Sign up | {{university.name}}{% endblock %}
 
 {% block content %}
 
-<div class="form_container">
+<div class="main-container">
   {% if user_created %}
     <p style="color:green">Welcome, {{ user_first_name }}. Your account
       has been created. Please, wait for an administrator to verify and enable
@@ -18,46 +18,54 @@
 
 <div class="signup-container">
 
-  <div class="form_container">
+  <div class="main-container">
     <h2>Student</h2>
-    <form method="post" action="/signup/student">
-      {% csrf_token %}
-      {{ student_form.non_field_errors }}
-      {% for field in student_form %}
-      <div class="base_field">
-        {{ field.label_tag }}
-        {{ field }}
-        {% if field.help_text %}
-        <small style="color: grey">{{ field.help_text }}</small>
+    <div class="form-container">
+      <form method="post" action="/signup/student">
+        {% csrf_token %}
+
+        {% if student_form.non_field_errors %}
+          <div class="error">{{ student_form.non_field_errors }}</div>
         {% endif %}
-        {% for error in field.errors %}
-        <p style="color: red">{{ error }}</p>
+
+        {% for field in student_form %}
+          {{ field.label_tag }}
+          {{ field }}
+          {% if field.help_text %}
+            <small class="help">{{ field.help_text }}</small>
+          {% endif %}
+          {% for error in field.errors %}
+            <p class="error">{{ error }}</p>
+          {% endfor %}
         {% endfor %}
-      </div>
-      {% endfor %}
-      <input type="submit" value="Sign up">
-    </form>
+        <input type="submit" value="Sign up">
+      </form>
+    </div>
   </div>
 
-  <div class="form_container">
+  <div class="main-container">
     <h2>Teacher</h2>
-    <form method="post" action="/signup/teacher">
-      {% csrf_token %}
-      {{ teacher_form.non_field_errors }}
-      {% for field in teacher_form %}
-      <div class="base_field">
-        {{ field.label_tag }}
-        {{ field }}
-        {% if field.help_text %}
-        <small style="color: grey">{{ field.help_text }}</small>
+    <div class="form-container">
+      <form method="post" action="/signup/teacher">
+        {% csrf_token %}
+
+        {% if teacher_form.non_field_errors %}
+          <div class="error">{{ teacher_form.non_field_errors }}</div>
         {% endif %}
-        {% for error in field.errors %}
-        <p style="color: red">{{ error }}</p>
+
+        {% for field in teacher_form %}
+          {{ field.label_tag }}
+          {{ field }}
+          {% if field.help_text %}
+            <small class="help">{{ field.help_text }}</small>
+          {% endif %}
+          {% for error in field.errors %}
+            <p class="error">{{ error }}</p>
+          {% endfor %}
         {% endfor %}
-      </div>
-      {% endfor %}
-      <input type="submit" value="Sign up">
-    </form>
+        <input type="submit" value="Sign up">
+      </form>
+    </div>
   </div>
 
 </div>

@@ -627,18 +627,19 @@ def signup_student(request):
     if request.user.is_authenticated:
         return redirect("home")
 
+    d = init_render_dict(request)
+
     if request.method == "POST":
         form = StudentSignupForm(request.POST)
-        t_dict = {"signin_form": SigninForm(),
-                  "teacher_form": TeacherSignupForm(),
-                  "student_form": form}
+        d.update({"teacher_form": TeacherSignupForm(),
+                  "student_form": form})
         if form.is_valid():
             form.save()
-            t_dict["user_created"] = True
-            t_dict["user_first_name"] = form.cleaned_data.get("first_name")
-            t_dict["student_form"] = StudentSignupForm()
+            d["user_created"] = True
+            d["user_first_name"] = form.cleaned_data.get("first_name")
+            d["student_form"] = StudentSignupForm()
 
-        return render(request, "signup.html", t_dict)
+        return render(request, "signup.html", d)
     else:
         return redirect("signup")
 
@@ -647,18 +648,19 @@ def signup_teacher(request):
     if request.user.is_authenticated:
         return redirect("home")
 
+    d = init_render_dict(request)
+
     if request.method == "POST":
         form = TeacherSignupForm(request.POST)
-        t_dict = {"signin_form": SigninForm(),
-                  "teacher_form": form,
-                  "student_form": StudentSignupForm()}
+        d.update({"teacher_form": form,
+                  "student_form": StudentSignupForm()})
         if form.is_valid():
             form.save()
-            t_dict["user_created"] = True
-            t_dict["user_first_name"] = form.cleaned_data.get("first_name")
-            t_dict["teacher_form"] = TeacherSignupForm()
+            d["user_created"] = True
+            d["user_first_name"] = form.cleaned_data.get("first_name")
+            d["teacher_form"] = TeacherSignupForm()
 
-        return render(request, "signup.html", t_dict)
+        return render(request, "signup.html", d)
     else:
         return redirect("signup")
 
