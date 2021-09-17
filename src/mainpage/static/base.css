@@ -137,7 +137,7 @@ header {
  * Signinbar
  ****************************************************************** */
 
-.signinbar {
+.signinbar-controls {
     display: flex;
     align-items: center;
     justify-content: start;
@@ -156,7 +156,7 @@ header {
 }
 
 .signinbar input[type=password] {
-    margin-left: -3px;
+    margin-left: 3px;
 }
 
 .signinbar input[type=email], .signinbar input[type=password] {
@@ -187,7 +187,6 @@ header {
 .signinbar input[type=password]:hover,
 .signinbar input[type=password]:focus {
     border-left: 3px solid var(--form-submit-bg-c);
-    margin-left: -6px;
 }
 
 .signinbar input[type=submit] {
@@ -511,6 +510,10 @@ ul.search-result hr {
 /* ******************************************************************
  * Forms
  ****************************************************************** */
+
+.form-error {
+    color: red;
+}
 
 .form-container {
     display: flex;
