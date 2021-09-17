@@ -667,13 +667,14 @@ def signup(request):
     if request.user.is_authenticated:
         return redirect("home")
 
-    t_dict = {
+    d = init_render_dict(request)
+    d.update({
         "signin_form": SigninForm(),
         "teacher_form": TeacherSignupForm(),
         "student_form": StudentSignupForm()
-    }
+    })
 
-    return render(request, "signup.html", t_dict)
+    return render(request, "signup.html", d)
 
 
 def signin(request):
