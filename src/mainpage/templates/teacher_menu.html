@@ -1,4 +1,23 @@
-<a href="/departments">Departments</a>
-<a href="/departments/{{user.teacher.departments.0.dept_id.id}}/classes">Classes</a>
-<a href="/users/{{user.id}}/teachings">Teachings</a>
-<a href="/users/{{user.id}}/stats">Stats</a>
+{% url "departments" as target_url %}
+<a href={{target_url}}
+   {% if request.path == target_url %} class="menu-current" {% endif %}>
+  Departments
+</a>
+
+{% url "classes" user.teacher.departments.0.dept_id.id as target_url %}
+<a href={{target_url}}
+   {% if request.path == target_url %} class="menu-current" {% endif %}>
+  Classes
+</a>
+
+{% url "teachings" user.id as target_url %}
+<a href={{target_url}}
+   {% if request.path == target_url %} class="menu-current" {% endif %}>
+  Teachings
+</a>
+
+{% url "stats" user.id as target_url %}
+<a href={{target_url}}
+   {% if request.path == target_url %} class="menu-current" {% endif %}>
+  Stats
+</a>

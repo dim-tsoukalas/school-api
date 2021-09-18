@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}User settings | {{university.name}}{% endblock %}
+
+
+{% block content %}
+
+<div class="main-container">
+  <h2>User settings</h2>
+</div>
+
+<div class="main-container">
+  <h3>E-mail</h3>
+
+  <p>Current Email: {{user.object.email}}</p>
+
+  <div class="form-container">
+    <form id="base-form" method="post" action="">
+      {% csrf_token %}
+      <input type="hidden" name="mode" value="email">
+      {{ settings_email.form.non_field_errors }}
+      <table>
+        <tbody>
+          {% for field in settings_email.form %}
+          <tr>
+            {% if field.label_tag %}
+            <td class="label">{{ field.label_tag }}</td>
+            {% endif %}
+
+            <td>{{ field }}</td>
+
+            {% if not field.errors and field.help_text %}
+            <td class="help">{{field.help_text}}</td>
+            {% endif %}
+
+            {% for error in field.errors %}<td>
+            <td class="error">{{ error }}</td>
+            {% endfor %}
+          </tr>
+
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <input type="submit" value="Update">
+
+    </form>
+  </div>
+
+</div>
+
+<div class="main-container">
+  <h3>Password</h3>
+
+  <div class="form-container">
+    <form id="base-form" method="post" action="">
+      {% csrf_token %}
+      <input type="hidden" name="mode" value="password">
+      {{ settings_password.form.non_field_errors }}
+      <table>
+        <tbody>
+          {% for field in settings_password.form %}
+          <tr>
+            {% if field.label_tag %}
+            <td class="label">{{ field.label_tag }}</td>
+            {% endif %}
+
+            <td>{{ field }}</td>
+
+            {% if not field.errors and field.help_text %}
+            <td class="help">{{field.help_text}}</td>
+            {% endif %}
+
+            {% for error in field.errors %}<td>
+            <td style="color: red">{{ error }}</td>
+            {% endfor %}
+          </tr>
+
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <input type="submit" value="Change">
+
+    </form>
+
+  </div>
+
+</div>
+
+{% endblock %}

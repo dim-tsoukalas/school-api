@@ -1,7 +1,21 @@
-<a href="/departments">Departments</a>
+{% url "departments" as target_url %}
+<a href={{target_url}}
+   {% if request.path == target_url %} class="menu-current" {% endif %}>
+  Departments
+</a>
 
 {% if dept.name %}
-<a href="/departments/{{dept.id}}/classes">Classes</a>
+
+{% url "classes" dept.id as target_url %}
+<a href={{target_url}}
+   {% if request.path == target_url %} class="menu-current" {% endif %}>
+  Classes
+</a>
+
 {% endif %}
 
-<a href="/users">Users</a>
+{% url "users" as target_url %}
+<a href={{target_url}}
+   {% if request.path == target_url %} class="menu-current" {% endif %}>
+  Users
+</a>

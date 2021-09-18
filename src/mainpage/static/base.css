@@ -1,6 +1,7 @@
 :root {
     --menu-bg-c: #223344;
     --form-submit-bg-c: #3e9b15;
+    --form-error-fg-c: red;
 }
 
 html, body {
@@ -102,6 +103,11 @@ header {
     background-color: #222;
 }
 
+.menu-current {
+    background-color: #fff;
+    color: #223344;
+}
+
 
 /* ******************************************************************
  * Menu: User
@@ -132,7 +138,7 @@ header {
  * Signinbar
  ****************************************************************** */
 
-.signinbar {
+.signinbar-controls {
     display: flex;
     align-items: center;
     justify-content: start;
@@ -151,14 +157,27 @@ header {
 }
 
 .signinbar input[type=password] {
-    margin-left: -3px;
+    margin-left: 3px;
 }
 
 .signinbar input[type=email], .signinbar input[type=password] {
     font-size: 0.8em;
-    width: 17ch;
+    width: 10ch;
     padding: 3px;
 }
+
+@media screen and (min-width: 48em) {
+    .signinbar input[type=email], .signinbar input[type=password] {
+        width: 17ch;
+    }
+}
+
+@media screen and (min-width: 64em) {
+    .signinbar input[type=email], .signinbar input[type=password] {
+        width: 24ch;
+    }
+}
+
 
 .signinbar input[type=email]:hover,
 .signinbar input[type=email]:focus {
@@ -169,7 +188,7 @@ header {
 .signinbar input[type=password]:hover,
 .signinbar input[type=password]:focus {
     border-left: 3px solid var(--form-submit-bg-c);
-    margin-left: -6px;
+    margin-left: 0;
 }
 
 .signinbar input[type=submit] {
@@ -187,28 +206,50 @@ header {
     background-color: #000;
 }
 
+.signinbar .error {
+    color: var(--form-error-fg-c);
+}
+
 
 /* ******************************************************************
  * Searchbar
  ****************************************************************** */
 
+.searchbar {
+    margin-top: 10px;
+}
+
+@media screen and (min-width: 39em) {
+    .searchbar {
+        margin-top: 0;
+    }
+}
+
+.searchbar form {
+    display: flex;
+    align-items: stretch;
+    justify-content: start;
+}
+
 .searchbar input {
     border: none;
     margin: 0;
     padding: 0;
+    font-family: sans-serif;
 }
 
 .searchbar input[type=text] {
     border-top-left-radius: 3px;
     border-bottom-left-radius: 3px;
     font-size: 1.1em;
-    width: 15ch;
+    width: 24ch;
     padding: 3px;
 }
 
 .searchbar input[type=text]:hover,
 .searchbar input[type=text]:focus {
     border-left: 3px solid var(--form-submit-bg-c);
+    margin-left: -3px;
 }
 
 .searchbar input[type=submit] {
@@ -218,7 +259,6 @@ header {
     background-color: var(--form-submit-bg-c);
     color: #fff;
     padding: 3px 7px;
-    margin-left: -5px;
     cursor: pointer;
 }
 
@@ -402,6 +442,38 @@ li.entity-box {
 }
 
 
+/* search-result */
+
+ul.search-result {
+    display: flex;
+    align-items: stretch;
+    justify-content: left;
+    flex-wrap: wrap;
+
+    list-style: none;
+    padding: 0;
+    margin-top: 15px;
+
+    background-color: #fff;
+}
+
+ul.search-result li {
+    display: flex;
+    flex-direction: column;
+    padding: 5px;
+    width: 100%;
+
+}
+
+ul.search-result span {
+    margin-top: 5px;
+}
+
+ul.search-result hr {
+    width: 100%;
+    border: 1px solid #eee;
+}
+
 
 /* ******************************************************************
  * Content: Modal
@@ -492,6 +564,20 @@ li.entity-box {
     float: right;
 }
 
+.form-container label {
+    color: #000;
+    padding: 7px 4px;
+}
+
+.form-container .help {
+    color: #3f3f3f;
+    padding: 0 0 0 4px;
+}
+
+.form-container .error {
+    color: var(--form-error-fg-c);
+}
+
 .form-container td.label {
     color: #000;
     padding: 7px 4px;
@@ -575,60 +661,6 @@ li.entity-box {
     justify-content: center;
 }
 
-
-/*
- * Inputs and Forms: form_container
- */
-
-.form_container {
-    box-sizing: border-box;
-    border: 1px solid #fff;
-    border-radius: 10px;
-    background-color: #eee;
-    padding: 15px;
-    margin: 10px;
-}
-
-.form_container p {
-    text-align: center;
-}
-
-.form_container label {
-    padding: 0 0 3px 0;
-    display: inline-block;
-}
-
-.base_field {
-    padding-bottom: 8px;
-}
-
-.form_container input, select {
-    width: 100%;
-    padding: 5px;
-    border: 1px solid #bbb;
-    border-radius: 3px;
-}
-
-.form_container input:hover,
-.form_container input:focus {
-    border-left: 3px solid var(--form-submit-bg-c);
-    margin-left: -2px;
-}
-
-.form_container input[type=submit] {
-    border: 2px solid var(--form-submit-bg-c);
-    border-radius: 3px;
-    background-color: var(--form-submit-bg-c);
-    color: #fff;
-    width: 100px;
-    float: right;
-    padding: 7px 10px;
-}
-
-.form_container input[type=submit]:hover {
-    background-color: #000;
-    border-color: #000;
-}
 
 /* staff: users */
 

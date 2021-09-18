@@ -37,8 +37,9 @@
             {% if user.is_authenticated %}
             <div class="menu-user">
               <a href="/signout" class="border-btn">Sign out</a>
-              <a href="/edit" class="border-btn">Edit</a>
-              <a href="/edit" class="menu-user-a">{{user.object.email}}</a>
+              <a href="/users/{{user.id}}/update" class="border-btn">Edit</a>
+              <a href="/users/{{user.id}}/update" class="menu-user-a">
+                {{user.object.email}}</a>
             </div>
             {% else %}
             {% comment %} Requires: signin_form {% endcomment %}

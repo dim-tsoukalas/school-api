@@ -1,31 +1,31 @@
 <div class="signinbar">
-  {% if user.signin_form %}
+
+  {% if user.signin_form.non_field_errors %}
+
   <div>
+    {% for error in user.signin_form.non_field_errors %}
+       <label class="error">{{ error }}</label>
+    {% endfor %}
+  </div>
+
+  {% else %}
+
+  <div>
+    {% for field in user.signin_form %}
+      {% for error in field.errors %}
+        <label class="error">{{ error }}</label>
+      {% endfor %}
+      {% endfor %}
+  </div>
+
+  {% endif %}
+
+  <div class="signinbar-controls">
     <form method="post" action="/signin">
       {% csrf_token %}
-
-      {% if user.signin_form.non_field_errors %}
-
-          {% for error in user.signin_form.non_field_errors %}
-              <label>{{ error }}</label>
-          {% endfor %}
-
-      {% else %}
-
-           {% for field in user.signin_form %}
-               {% for error in field.errors %}
-                   <label style="color: red">{{ error }}</label>
-               {% endfor %}
-           {% endfor %}
-
-      {% endif %}
-
-      {% for field in user.signin_form %}
-          {{ field }}
-      {% endfor %}
+      {% for field in user.signin_form %}{{ field }}{% endfor %}
       <input type="submit" value="Sign in">
     </form>
+    <a class="border-btn" href="/signup">Sign up</a>
   </div>
-  {% endif %}
-  <a class="border-btn" href="/signup">Sign up</a>
 </div>
