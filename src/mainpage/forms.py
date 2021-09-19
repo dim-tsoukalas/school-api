@@ -85,7 +85,7 @@ class DepartmentStateForm(forms.ModelForm):
         if state == States.SIGNUP:
             acc = []
             for i in Teaching.objects.filter(year=year, semester=semester):
-                if not i.theory_weight or not i.lab_weight:
+                if i.theory_weight is None or i.lab_weight is None:
                     acc.append(i.class_id.name)
             if acc:
                 raise ValidationError(
