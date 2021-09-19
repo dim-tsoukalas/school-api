@@ -243,13 +243,15 @@ def info_update_post(request, dept_id, class_public_id):
     class_obj = d["class"]["object"]
     if d["perm"]["is_admin"]:
         form = ClassInsertForm(dept_obj, request.POST, instance=class_obj)
-        new_public_id = form.cleaned_data["public_id"]  # Use the new id.
+        
     elif d["perm"]["is_teacher"]:
         form = ClassDescriptionForm(request.POST, instance=class_obj)
         new_public_id = class_public_id
 
     if form.is_valid():
         form.save()
+        if d["perm"]["is_admin"]:
+            new_public_id = form.cleaned_data["public_id"]  # Use the new id.
         return redirect(
             "class",
             dept_id=dept_id,
