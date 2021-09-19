@@ -41,7 +41,8 @@ def render_dict_add_class(t_dict, class_public_id):
     class_signups = []
     for i in teachings:
         try:
-            class_signups.append(ClassSignup.objects.get(teaching=i))
+            for j in ClassSignup.objects.filter(teaching=i):
+                class_signups.append(j)
         except ClassSignup.DoesNotExist:
             pass
 
@@ -781,4 +782,5 @@ def my_teachings(request, user_id):
     teachings = Teaching.objects.filter(
         teacher=teacher, year=year).select_related("class_id")
     d["teachings"] = teachings
+    print(year)
     return render(request, "classes_my_teachings.html", d)
