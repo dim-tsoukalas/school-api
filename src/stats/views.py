@@ -57,24 +57,48 @@ def pie_classes_passed(user_id, year, semester):
     signups = ClassSignup.objects.filter(
         student__user__id=user_id,
         teaching__year=year,
-        teaching__semester=semester,
-        locked=True
-    ).only("final_mark")
+        teaching__semester=semester
+    ).only("final_mark", "locked")
     passed = 0
     failed = 0
+    pending = 0
     for signup in signups:
-        if signup.final_mark >= PASSING_MARK:
+        if not signup.locked or not signup.final_mark:
+            pending += 1
+        elif signup.final_mark >= PASSING_MARK:
             passed += 1
-        else:
+        elif signup.final_mark < PASSING_MARK:
             failed += 1
 
-    passed = passed / (passed + failed) * 100
-    failed = 100 - passed
-    labels = "Passed", "Failed"
-    sizes = [passed, failed]
+    if (passed + failed + pending) == 0:
+        labels = ["No signups yet"]
+        colors = ["gray"]
+        sizes = [100]
+    elif pending == 0:
+        labels = f"Passed ({passed})", f"Failed ({failed})"
+        colors = "green", "orange"
+        passed = passed / (passed + failed) * 100
+        failed = 100 - passed
+        sizes = [passed, failed]
+    else:
+        passed_p = passed / (passed + failed + pending) * 100
+        failed_p = failed / (passed + failed + pending) * 100
+        pending_p = 100 - (passed_p + failed_p)
+        if passed_p + failed_p == 0:
+            labels = ("Graded (0)", f"Pending ({pending})")
+            colors = ("orange", "gray")
+            sizes = [0, pending_p]
+        else:
+            labels = (f"Passed ({passed})", f"Failed ({failed})",
+                      f"Pending ({pending})")
+            colors = ("green", "orange", "gray")
+            sizes = [passed_p, failed_p, pending_p]
+
     fig, ax = plt.subplots()
-    ax.pie(sizes, labels=labels, autopct="%1.1f%%")
+    ax.pie(sizes, labels=labels, autopct="%1.1f%%", colors=colors)
+    ax.set_title(f" {year} - {Semesters(semester).label}")
     ax.axis("equal")
+    ax.legend()
 
     output = io.StringIO()
     fig.savefig(output, format="svg")
@@ -92,7 +116,7 @@ def bar_classes_assigned_per_year(user_id):
 
     fig, ax = plt.subplots()
     x = np.arange(len(years.keys()))
-    rects = ax.bar(x, years.values(), width=0.3)
+    # rects = ax.bar(x, years.values(), width=0.3)
     ax.set_xlabel("Years")
     ax.set_ylabel("Classes")
     ax.set_title("Number of assigned classes per year")
