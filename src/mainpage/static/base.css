@@ -548,7 +548,7 @@ ul.search-result hr {
 }
 
 .form-container input[type=checkbox] {
-    width: 0px;
+    width: 15px;
     padding: 0px;
     border: none;
     border-radius: 0px;
