@@ -11,9 +11,9 @@ manage university classes and grades.
 ** Launch
 To run this project
 
-```
+#+BEGIN_SRC sh
 $ python manage.py runserver
-```
+#+END_SRC
 
 
 *** mainpage
