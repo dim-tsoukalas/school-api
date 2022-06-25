@@ -1,9 +1,20 @@
-* Class Manager
+* Intruduction
 
 Project for the Webdev class. The project involves creating a web application to
 manage university classes and grades.
 
-** Django apps
+** Technologies
+- Python 3
+- Django 
+- SQLite 
+
+** Launch
+To run this project
+
+```
+$ python manage.py runserver
+```
+
 
 *** mainpage
 
