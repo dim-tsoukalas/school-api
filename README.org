@@ -33,6 +33,8 @@ Now that the server’s running, visit http://127.0.0.1:8000/ with your web brow
 
 ** Examples of use
 
+For easier way watch the youtube video: https://youtu.be/6pXrn6JYEqw
+
 The start page at the browser:
 
 [[https://user-images.githubusercontent.com/64429662/175807456-b2fe6978-89db-4b1c-a7cf-1b8574843356.png]]
