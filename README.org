@@ -7,31 +7,9 @@ manage university classes and grades.
 - [[https://www.python.org/][Python]]
 - [[https://www.djangoproject.com/][Django]]
 - [[https://www.sqlite.org/index.html][SQLite]]
+- [[https://www.javascript.com/][Javascript]], AJAX
 
-** Launch
-To run this project, type the following command inside the *~/Project/src* directory
-
-#+BEGIN_SRC sh
-$ python manage.py runserver
-#+END_SRC
-
-After run the command, you will see the following output on the command line
-
-#+BEGIN_SRC 
-Performing system checks...
-
-System check identified no issues (0 silenced).
-
-June 25, 2022 - 14:31:47
-Django version 4.0.5, using settings 'class_manager.settings'
-Starting development server at http://127.0.0.1:8000/
-Quit the server with CONTROL-C.
-#+END_SRC
-
-That means that you’ve started the Django server, a lightweight web server written purely in Python.
-Now that the server’s running, visit http://127.0.0.1:8000/ with your web browser.
-
-** Examples of use
+** Screenshots
 
 /YouTube video/: *https://youtu.be/6pXrn6JYEqw*
 
@@ -87,10 +65,30 @@ if the password don't meet the requirements of a 'safe' password/
 [[https://user-images.githubusercontent.com/64429662/175808283-a9c878b3-b07c-4eda-9e67-dbd22ee09881.png]]
 
 
-*** Stats of every class
-/Stats for students in a class and passed the class/
 
-[[https://user-images.githubusercontent.com/64429662/175808340-0f479f34-9dfb-4ce4-99d5-fe88901e3748.png]]
+
+** Launch
+To run this project, type the following command inside the *~/Project/src* directory
+
+#+BEGIN_SRC sh
+$ python manage.py runserver
+#+END_SRC
+
+After run the command, you will see the following output on the command line
+
+#+BEGIN_SRC 
+Performing system checks...
+
+System check identified no issues (0 silenced).
+
+June 25, 2022 - 14:31:47
+Django version 4.0.5, using settings 'class_manager.settings'
+Starting development server at http://127.0.0.1:8000/
+Quit the server with CONTROL-C.
+#+END_SRC
+
+That means that you’ve started the Django server, a lightweight web server written purely in Python.
+Now that the server’s running, visit http://127.0.0.1:8000/ with your web browser.
 
 
 ** Sources
