@@ -33,62 +33,66 @@ Now that the server’s running, visit http://127.0.0.1:8000/ with your web brow
 
 ** Examples of use
 
-For easier way watch the youtube video: https://youtu.be/6pXrn6JYEqw
+/YouTube video/: *https://youtu.be/6pXrn6JYEqw*
 
-The start page at the browser:
+
+*** Start page
+/The start page of the project/
 
 [[https://user-images.githubusercontent.com/64429662/175807456-b2fe6978-89db-4b1c-a7cf-1b8574843356.png]]
 
-Register page
+
+*** Register page
+/The page that teacher or student sign-up/
 
 [[https://user-images.githubusercontent.com/64429662/175807507-fc760fc5-603a-4393-929f-b01e91ef2baa.png]]
 
-Checking the requirements of the password and shows up error message, if the password don't meet the requirements of a 'safe' password
+
+*** Email and password checks
+**** Password requiremnts check
+/Checking the requirements of the password and shows up error message, 
+if the password don't meet the requirements of a 'safe' password/
 
 [[https://user-images.githubusercontent.com/64429662/175807590-f745d006-db6b-4127-b3e6-4d1e556f6217.png]]
 
-Check if email or password are incorrect and shows this message
+
+**** Email and password check 
+/Check if email or password are incorrect and shows this message/
 
 [[https://user-images.githubusercontent.com/64429662/175807718-71e88bb2-36c1-4562-8f15-d75d28085905.png]]
 
-Professors classes
+
+*** Professors classes
 
 [[https://user-images.githubusercontent.com/64429662/175807961-2333b5fe-7892-4d37-8368-f65603f796ae.png]]
 
-Array with teachers and prerequisite classes
+
+*** Array with teachers and prerequisite classes
 
 [[https://user-images.githubusercontent.com/64429662/175808018-1bd0b354-b947-48b2-a33d-65b0cf2f7ec2.png]]
 
-Edit profile
+
+*** Edit profile
+/The user from this page can edit his profile information/
 
 [[https://user-images.githubusercontent.com/64429662/175808213-beedf229-632a-4641-9422-5d2b12a2e379.png]]
 
-Superuser activate-deactivate-accept-delete-edit
+
+*** Superuser activate-deactivate-accept-delete-edit
+/Page for superuser for:/
+- Activate or deactivate user
+- Accept or delete pending user registration
+- Edit users information
 
 [[https://user-images.githubusercontent.com/64429662/175808283-a9c878b3-b07c-4eda-9e67-dbd22ee09881.png]]
 
-Stats of every class
+
+*** Stats of every class
+/Stats for students in a class and passed the class/
 
 [[https://user-images.githubusercontent.com/64429662/175808340-0f479f34-9dfb-4ce4-99d5-fe88901e3748.png]]
 
 
-
-
-
-
-
 ** Sources
-
-***
-
-*** mainpage
-
-This is the base app. It serves the homepage, a listing of all the available
-departments and links for accessing every other feature of the web application.
-It provides database models for the university departments.
-
-*** users
-**depends: mainpage**
-
-User authentication and authorization. There are four user types supported: superuser,
-deptadmin, teacher, student.
+This app is made for a college project that we had to create a web API.
+We used the documentation of Django and some tutorials from web.
