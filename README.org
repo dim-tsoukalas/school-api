@@ -1,4 +1,5 @@
-* Intruduction
+* School API
+** Intruduction
 
 Project for the Web Development class. The project involves creating a web application to
 manage university classes and grades.
