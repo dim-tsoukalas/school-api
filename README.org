@@ -1,12 +1,12 @@
 * Intruduction
 
-Project for the Webdev class. The project involves creating a web application to
+Project for the Web Development class. The project involves creating a web application to
 manage university classes and grades.
 
 ** Technologies
-- Python 3
-- Django 
-- SQLite 
+- [[https://www.python.org/][Python]]
+- [[https://www.djangoproject.com/][Django]]
+- [[https://www.sqlite.org/index.html][SQLite]]
 
 ** Launch
 To run this project, type the following command inside the *~/Project/src* directory
@@ -95,4 +95,4 @@ if the password don't meet the requirements of a 'safe' password/
 
 ** Sources
 This app is made for a college project that we had to create a web API.
-We used the documentation of Django and some tutorials from web.
+We used the documentation of [[https://www.djangoproject.com/][Django]] and some tutorials from web.
