@@ -1,4 +1,3 @@
-* School API
 ** Intruduction
 
 Project for the Web Development class. The project involves creating a web application to
