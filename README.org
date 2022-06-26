@@ -9,23 +9,27 @@ manage university classes and grades.
 - SQLite 
 
 ** Launch
-To run this project
+To run this project, type the following command inside the *~/Project/src* directory
 
 #+BEGIN_SRC sh
 $ python manage.py runserver
 #+END_SRC
 
+After run the command, you will see the following output on the command line
+
 #+BEGIN_SRC 
-Watching for file changes with StatReloader
 Performing system checks...
 
 System check identified no issues (0 silenced).
+
 June 25, 2022 - 14:31:47
 Django version 4.0.5, using settings 'class_manager.settings'
 Starting development server at http://127.0.0.1:8000/
 Quit the server with CONTROL-C.
 #+END_SRC
 
+That means that you’ve started the Django server, a lightweight web server written purely in Python.
+Now that the server’s running, visit http://127.0.0.1:8000/ with your web browser.
 
 *** mainpage
 
